@@ -1,0 +1,54 @@
+<!-- livebook:{"file_entries":[{"name":"scriptorium_intro.png","type":"attachment"},{"name":"scriptorium_logo_alpha.png","type":"attachment"}]} -->
+
+# Introduction to Scriptorium
+
+## ✨What is scriptorium?✨
+
+### 🎓 Learn
+
+![](files/scriptorium_intro.png)
+`scriptorium` is a step-by-step self-paced academy for learning Chainbase Network's manuscripts.
+
+It uses the power of [Elixir](https://elixir-lang.org/) and [Livebook](https://livebook.dev/) to provide an immersive experience.
+
+#### YOU will learn the following:
+
+* What is a Manuscript 📜
+* How to Deploy / Publish Manuscripts 🚀
+* Mastery of the CLI / GUI 🛡️
+* How to Test / Debug Manuscripts 🐞
+* Common Manuscript Use Cases 💼
+* Advanced Techniques for Using Them 🔧
+
+### 🤷🏿‍♀️ Why Create This ?
+
+Because you asked for it! Literally. At each live coding session on our discord, community members asked where they could go to get started with manuscripts that would give them step-by-step knowledge. `scriptorium` is the answer you seek!
+
+### 🔧 How Does It Work?
+
+The `scriptorium` is the mystical workshop for training the next of manuscript scholars.
+
+1. **Livebook Format** - each chapter is its own respective `.livemd` file and can be viewed on any hosted instance of livebook. a quick preview is possible with any `.md` reader, such as the one on github, but it will not render interactive components
+2. **Chapter by Chapter** - each chapter walks you through a given concept area or focus. the first focuses are introductory and intended to give you the vocabulary and conceptual framework for later areas.
+3. **Hands-on Learning** - livebook's interactive format will keep you engaged throughout. no more idle reading. you will be executing code and interacting with manuscripts directly from `scriptorium`
+4. **Open Box Approach** - as opposed to a closed system or learning platform, all source code, all examples, everything is made transparent to you. you can even modify things on the fly and see how they execute differently!
+
+### ⚗️ Why Use Elixir?
+
+Elixir's syntax is readable plus it has many positive features for data: immutable data structures, pattern matching, enum and stream modules, lightweight concurrency, data pipelines, pure functionalism, and easy data visualization.
+
+Our `manuscript-core` makes the claim that you can do things in ANY language! So why not choose Elixir?
+
+## 📖 Simple Definitions
+
+📜 `manuscript` - refers to the hosted/published dataset definitions which point, using SQL, to specific data to be served regarding specific protocols
+
+⏾ `network` - refers to *Chainbase Network*, an omnichain data network serving raw, decoded, and abstracted data from over ~200 web3 protocols
+
+学 `scriptorium` - refers to this interactive livebook, a series of `.livemd` files that contain interactive tutorials designed to bring developers up to speed on using manuscripts to query the network
+
+<!-- livebook:{"break_markdown":true} -->
+
+⚙️ To view the source code for this project visit https://github.com/KagemniKarimu/scriptorium
+
+**[← Previous: Welcome Page / Index](./index.livemd) | [Next: Introduction to Scriptorium →](./introduction.livemd)**
