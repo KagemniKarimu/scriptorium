@@ -1,0 +1,217 @@
+<!-- livebook:{"file_entries":[{"name":"scriptorium_chainbase.png","type":"attachment"},{"name":"scriptorium_intro.png","type":"attachment"},{"name":"scriptorium_logo_alpha.png","type":"attachment"}]} -->
+
+# Understanding Chainbase Network
+
+```elixir
+Mix.install([
+  # HTTP client
+  {:req, "~> 0.4.0"},
+  # JSON parser
+  {:jason, "~> 1.4"},
+  # For visualization
+  {:kino, "~> 0.12.0"},
+])
+```
+
+## 🌐 What is Chainbase Network 🌐
+
+![](files/scriptorium_chainbase.png)
+
+## The Basics
+
+### Three Types of Data
+
+Every blockchain is an immutable ledger and sequential data store. Chainbase Network gives you super powers for accessing and manipulating a blockchain's data.
+
+#### Raw
+
+<blockquote>
+    Raw data is unformatted data coming straight from the blockchain. This could be blocks, transactions, blobs, logs or trace calls.
+</blockquote>
+
+OK - calling the data 'unformatted' is a bit of a misnomer. The data is actually neatly formatted into queryable data tables. For example, if we look at an Ethereum Block - we have the following "raw" data from `ethereum.blocks` table:
+
+| Field        | Type    | Description                                                                 | Example                                                            |
+| ------------ | ------- | --------------------------------------------------------------------------- | ------------------------------------------------------------------ |
+| block_number | BIGINT  | Block number uniquely identifying the block                                 | 19224000                                                           |
+| hash         | VARCHAR | Hash value representing the unique identity of the block(with bloom filter) | 0xb2b0ac76e3b526ece64896a9f764258c5d5cdd562e46def4bbad65ff3b423a6f |
+| parent_hash  | VARCHAR | Hash value of the parent block(with bloom filter)                           | 0xdd68e6c9e141dce7d6da9a0b2544f1344ed9d3db91362914dfaf7fed77441e20 |
+| nonce        | VARCHAR | Nonce value associated with the block                                       | 0x0000000000000000                                                 |
+
+The data has been truncated to fit above, but its overall schema is observable from this table.
+
+#### Decoded
+
+<blockquote>
+  Decoded blockchain contract data refers to the information extracted from smart contracts on a blockchain that has been translated into a human-readable format. 
+</blockquote>
+
+Some data is not human-readable in its raw form. We have the ability to request decoded data as well.
+
+For example, as is shown in the `ethereum.trace_calls_decoded` table, we have various data types:
+
+| Field Name        | Type     | Description                                                                  | Example                                                                                             |
+| ----------------- | -------- | ---------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| block_number      | BIGINT   | Block number uniquely identifying the block                                  | 5247667                                                                                             |
+| block_timestamp   | DATETIME | Timestamp of when the block was mined                                        | 2018-03-13 11:25:51                                                                                 |
+| transaction_hash  | VARCHAR  | Hash value representing the unique identity of the block (with bloom filter) | 0xeb903ee535e48212e883369edd4649708e3c738d89456e90d5a7eec1060657a4                                  |
+| transaction_index | INT      | Index of the transaction within the block                                    | 107                                                                                                 |
+| trace_index       | INT      | Index of the trace within the transaction                                    | 6                                                                                                   |
+| from_address      | VARCHAR  | Token transaction sender (with bloom filter)                                 | 0xf87a7ec94884f44d9de33d36b73f42c7c0dd38b1                                                          |
+| to_address        | VARCHAR  | Token transaction target user                                                | 0x9a0242b7a33dacbe40edb927834f96eb39f8fbcb                                                          |
+| method_id         | VARCHAR  | Corresponding Smart Contract Methods                                         | 0xdd62ed3e                                                                                          |
+| signature         | VARCHAR  | The signature of the transaction                                             | allowance(address,address)                                                                          |
+| decoded           | VARCHAR  | The decoded data of the transaction                                          | [["0xf87a7ec94884f44d9de33d36b73f42c7c0dd38b1","0xc893f7e271d1436ae3758cd59d5242884c02fb7f"],["0"]] |
+
+#### Abstracted
+
+<blockquote>
+  Abstracted blockchain data refers to information which has been compiled from decoded data into a higher level o
+</blockquote>
+
+<!-- livebook:{"break_markdown":true} -->
+
+### Data Flow
+
+<!-- livebook:{"break_markdown":true} -->
+
+1. **Raw Blockchain Data** is various sources. It is put in a common format so that it can be digested by the network actors and manipulated by developers.
+2. Data, once in proper format, is added to the **Data Access Layer**.  At the moment, this is done by the Chainbase team, but in the future, data providers from outside the team will be able to provide properly formatted data to the network permissionlessly.
+3. Developers define data sets from the available data and place these definitions on the **Co-Processor Layer**. These definitions are called *'manuscripts'* and can be executed by the Chainbase Virtual Machine.
+4. When called, the 
+   a. Simultaneously,
+
+<!-- livebook:{"break_markdown":true} -->
+
+<!-- Learn more at https://mermaid-js.github.io/mermaid -->
+
+```mermaid
+graph TB
+    User["6. User/Application"]
+    Raw["1. Raw Blockchain Data"]
+    
+    subgraph Chain["Chainbase Network"]
+        subgraph Process["Data Processing"]
+            Access["2. Data Access Layer"]
+            Proc["3. Co-processor Layer"]
+            Exec["4. Execution Layer"]
+            
+            Access --> Proc
+            Proc --> |"Manuscript"| Exec
+            Exec --> |"CVM"| Out
+        end
+        
+        subgraph Security["Security & Consensus"]
+            Val["4a. Validators"]
+            Val -.-> Exec
+        end
+        
+        Out{{"5. AI-Ready Data"}}
+    end
+    
+    Raw --> Access
+    Out --> User
+
+    style User fill:#4527a0,color:#fff
+    style Raw fill:#5e35b1,color:#fff
+    style Chain fill:#f5f5f5,stroke:#673ab7
+    style Process fill:#f8f5ff,stroke:#7e57c2
+    style Security fill:#f8f5ff,stroke:#7e57c2
+    style Access fill:#673ab7,color:#fff
+    style Proc fill:#7e57c2,color:#fff
+    style Exec fill:#9575cd,color:#fff
+    style Val fill:#b39ddb,color:#fff
+    style Out fill:#FFD700,color:#000,stroke:#B8860B
+```
+
+<!-- livebook:{"break_markdown":true} -->
+
+### Understanding Manuscripts' Network Function
+
+Developers build and deploy manuscripts. Manuscripts are published to the co-processor layer where they are made available to others. Others select manuscripts and get the processed data.
+
+<!-- livebook:{"break_markdown":true} -->
+
+<!-- Learn more at https://mermaid-js.github.io/mermaid -->
+
+```mermaid
+graph LR
+    Dev(("Developer"))
+    Create["Creates Data Processing
+    Recipes with Manuscripts"]
+    Share["Publishes to
+    Co-processor Layer"]
+    Reward["Earns Rewards When
+    Others Use Manuscript"]
+    
+    subgraph Usage["How Others Use It"]
+        User["Data Consumer"]
+        Select["Selects Manuscript"]
+        Process["Gets Processed Data"]
+        User --> Select
+        Select --> Process
+    end
+    
+    Dev --> Create
+    Create --> Share
+    Share --> Reward
+    Share -.-> Usage
+
+    style Dev fill:#4527a0,color:#fff,stroke-width:4px
+    style Create fill:#5e35b1,color:#fff
+    style Share fill:#673ab7,color:#fff
+    style Reward fill:#7e57c2,color:#fff
+    style Usage fill:#f5f5f5,stroke-dash:5
+```
+
+## Available Data
+
+```elixir
+# Make the HTTP request
+response = Req.get!("https://api.chainbase.com/api/v1/metadata/network_chains")
+
+# Parse the response body
+chains = response.body["graphData"]
+|> Enum.map(fn item -> 
+  %{
+    name: item["chain"]["name"],
+    status: item["chain"]["status"],
+    block_height: item["chain"]["blockHeight"],
+    data_volume: item["chain"]["dataVolume"],
+    last_update: item["chain"]["lastUpdate"]
+  }
+end)
+
+# Get summary statistics
+summary = %{
+  total_chains: length(chains),
+  online_chains: Enum.count(chains, & &1.status == "Online"),
+  total_data_volume: Enum.sum(Enum.map(chains, & &1.data_volume))
+}
+
+# Calculate percentage of online chains for the meter
+online_percentage = (summary.online_chains / summary.total_chains * 100) |> round()
+meter_filled = String.duplicate("█", div(online_percentage, 5))
+meter_empty = String.duplicate("░", 20 - div(online_percentage, 5))
+
+Kino.Markdown.new("""
+### Blockchain Network Statistics
+
+#### Network Status
+
+🔗 **Total Chains**: #{summary.total_chains}
+⚡ **Online Chains**: #{summary.online_chains} / #{summary.total_chains}
+
+#### Network Health Meter
+#{meter_filled}#{meter_empty} #{online_percentage}% online
+
+#### Storage & Processing
+💾 **Total Data Volume**: #{summary.total_data_volume} GB
+""")
+```
+
+## 🧭 Navigation
+
+⚙️ To view the source code for this project visit https://github.com/KagemniKarimu/scriptorium
+
+**[← Previous: Introduction to Scriptorium](./introduction.livemd) | [Next: Understanding the Chainbase Network →](./understanding_chainbase_network.livemd)**

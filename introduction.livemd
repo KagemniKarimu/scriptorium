@@ -47,8 +47,8 @@ Our `manuscript-core` makes the claim that you can do things in ANY language! So
 
 学 `scriptorium` - refers to this interactive livebook, a series of `.livemd` files that contain interactive tutorials designed to bring developers up to speed on using manuscripts to query the network
 
-<!-- livebook:{"break_markdown":true} -->
+## 🧭 Navigation
 
 ⚙️ To view the source code for this project visit https://github.com/KagemniKarimu/scriptorium
 
-**[← Previous: Welcome Page / Index](./index.livemd) | [Next: Introduction to Scriptorium →](./introduction.livemd)**
+**[← Previous: Welcome Page / Index](./index.livemd) | [Next: Understanding Chainbase Network →](./understanding_chainbase_network.livemd)**
