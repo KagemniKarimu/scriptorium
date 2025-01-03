@@ -6,7 +6,7 @@ the universal manuscript livebook &amp; learning center
 
 ```bash
 cd scriptorium
-docker build -t my-app .
-docker run --rm -p 8080:8080 -p 8081:8081 my-app
+docker build -t scriptorium .
+docker run --rm -p 8080:8080 -p 8081:8081 scriptorium
 
 ```
