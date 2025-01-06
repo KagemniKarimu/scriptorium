@@ -4,6 +4,7 @@ FROM ghcr.io/livebook-dev/livebook:0.14.5
 ENV LIVEBOOK_APPS_PATH "/apps"
 ENV LIVEBOOK_APPS_PATH_WARMUP "manual"
 ENV LIVEBOOK_APPS_PATH_HUB_ID "personal-hub"
+ENV LIVEBOOK_DEFAULT_HOME "/apps"
 
 # Notebooks and files
 COPY . /apps
