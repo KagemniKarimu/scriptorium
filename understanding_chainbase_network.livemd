@@ -1,4 +1,4 @@
-<!-- livebook:{"file_entries":[{"name":"scriptorium_chainbase.png","type":"attachment"},{"name":"scriptorium_intro.png","type":"attachment"},{"name":"scriptorium_logo_alpha.png","type":"attachment"}]} -->
+<!-- livebook:{"app_settings":{"access_type":"public","slug":"scriptorium-network"},"file_entries":[{"name":"scriptorium_chainbase.png","type":"attachment"},{"name":"scriptorium_intro.png","type":"attachment"},{"name":"scriptorium_logo_alpha.png","type":"attachment"}]} -->
 
 # Understanding Chainbase Network
 
@@ -10,6 +10,11 @@ Mix.install([
   {:jason, "~> 1.4"},
   # For visualization
   {:kino, "~> 0.12.0"},
+])
+
+Application.put_env(:livebook, :deployment, [
+  title: "Scriptorium",
+  public_access: true
 ])
 ```
 

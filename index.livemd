@@ -1,6 +1,13 @@
-<!-- livebook:{"file_entries":[{"name":"scriptorium_logo_alpha.png","type":"attachment"}]} -->
+<!-- livebook:{"app_settings":{"access_type":"public","slug":"scriptorium-index"},"file_entries":[{"name":"scriptorium_logo_alpha.png","type":"attachment"}]} -->
 
 # Scriptorium
+
+```elixir
+Application.put_env(:livebook, :deployment, [
+  title: "Scriptorium",
+  public_access: true
+])
+```
 
 ## ✨ Welcome Page ✨
 
