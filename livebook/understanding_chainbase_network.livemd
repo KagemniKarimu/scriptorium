@@ -48,7 +48,7 @@ The data has been truncated to fit above, but its overall schema is observable f
 #### Decoded
 
 <blockquote>
-  Decoded blockchain contract data refers to the information extracted from smart contracts on a blockchain that has been translated into a human-readable format. 
+  Decoded blockchain contract data refers to the information extracted from smart contracts on a blockchain that has been translated into a human-readable format.
 </blockquote>
 
 Some data is not human-readable in its raw form. We have the ability to request decoded data as well.
@@ -83,7 +83,7 @@ For example, as is shown in the `ethereum.trace_calls_decoded` table, we have va
 1. **Raw Blockchain Data** is various sources. It is put in a common format so that it can be digested by the network actors and manipulated by developers.
 2. Data, once in proper format, is added to the **Data Access Layer**.  At the moment, this is done by the Chainbase team, but in the future, data providers from outside the team will be able to provide properly formatted data to the network permissionlessly.
 3. Developers define data sets from the available data and place these definitions on the **Co-Processor Layer**. These definitions are called *'manuscripts'* and can be executed by the Chainbase Virtual Machine.
-4. When called, the 
+4. When called, the
    a. Simultaneously,
 
 <!-- livebook:{"break_markdown":true} -->
@@ -94,26 +94,26 @@ For example, as is shown in the `ethereum.trace_calls_decoded` table, we have va
 graph TB
     User["6. User/Application"]
     Raw["1. Raw Blockchain Data"]
-    
+
     subgraph Chain["Chainbase Network"]
         subgraph Process["Data Processing"]
             Access["2. Data Access Layer"]
             Proc["3. Co-processor Layer"]
             Exec["4. Execution Layer"]
-            
+
             Access --> Proc
             Proc --> |"Manuscript"| Exec
             Exec --> |"CVM"| Out
         end
-        
+
         subgraph Security["Security & Consensus"]
             Val["4a. Validators"]
             Val -.-> Exec
         end
-        
+
         Out{{"5. AI-Ready Data"}}
     end
-    
+
     Raw --> Access
     Out --> User
 
@@ -148,7 +148,7 @@ graph LR
     Co-processor Layer"]
     Reward["Earns Rewards When
     Others Use Manuscript"]
-    
+
     subgraph Usage["How Others Use It"]
         User["Data Consumer"]
         Select["Selects Manuscript"]
@@ -156,7 +156,7 @@ graph LR
         User --> Select
         Select --> Process
     end
-    
+
     Dev --> Create
     Create --> Share
     Share --> Reward
@@ -177,7 +177,7 @@ response = Req.get!("https://api.chainbase.com/api/v1/metadata/network_chains")
 
 # Parse the response body
 chains = response.body["graphData"]
-|> Enum.map(fn item -> 
+|> Enum.map(fn item ->
   %{
     name: item["chain"]["name"],
     status: item["chain"]["status"],
