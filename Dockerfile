@@ -7,7 +7,7 @@ ENV LIVEBOOK_APPS_PATH_HUB_ID "personal-hub"
 ENV LIVEBOOK_DEFAULT_HOME "/apps"
 
 # Notebooks and files
-COPY ./livebook/* /apps
+COPY . /apps
 
 # Cache apps setup at build time
 RUN /app/bin/warmup_apps
