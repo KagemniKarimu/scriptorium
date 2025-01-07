@@ -1,0 +1,153 @@
+<!-- livebook:{"app_settings":{"access_type":"public","slug":"scriptorium-manuscripts"},"file_entries":[{"name":"manuscripts_mechanics.png","type":"attachment"}]} -->
+
+# 🔮 scriptorium - fork
+
+```elixir
+Mix.install([
+  # HTTP client
+  {:req, "~> 0.4.0"},
+  # JSON parser
+  {:jason, "~> 1.4"},
+  # For visualization
+  {:kino, "~> 0.12.0"},
+])
+
+Application.put_env(:livebook, :deployment, [
+  title: "Scriptorium",
+  public_access: true
+])
+
+```
+
+## Section
+
+````elixir
+
+
+import Kino.Shorts
+
+version_check = """
+Git version:
+#{elem(System.cmd("git", ["--version"]), 0)}
+
+Make version:
+#{elem(System.cmd("make", ["--version"]), 0)}
+
+GO version:
+#{elem(System.cmd("go", ["version"]), 0)}
+
+Rust version:
+#{elem(System.cmd("cargo", ["version"]), 0)}
+"""
+
+Kino.Markdown.new(version_check) |> Kino.render()
+
+
+markdown("""
+![](files/manuscripts_mechanics.png)
+
+### Get Started with Manuscripts
+
+Now, that you have understood the basic network primitives, we can get into the specifics of manuscript mechanics. There is much to learn about manuscripts, but the main thing to understand is that they are fairly simple to create and maintain.
+
+Let's get started with a hands-on approach!
+""") |> Kino.render()
+
+
+buttons = [
+  Kino.Control.button("test") ,
+  Kino.Control.button("test") ,
+  Kino.Control.button("test") ,
+]
+
+grid(
+  buttons,
+  [columns: 3, boxed: true, gap: 8]
+) |> Kino.render()
+
+
+Kino.HTML.new("""
+<br />
+<br />
+<hr />
+
+<br />
+
+""") |> Kino.render()
+
+make_chart =
+
+
+markdown("""
+#### Build From Source
+
+To get started, we're going to build the [`manuscript-core`](https://github.com/chainbase-labs/manuscript-core) from source.
+`manuscript-core` is a monorepository from which we can compile both `manuscript-cli` and `manuscript-gui` binaries. There are separate interfaces implemented for each as shown below.
+
+```mermaid
+%%{init: {'theme': 'base', 'themeVariables': { 'fontSize': '16px'}, "htmlLabels": true}}%%
+
+flowchart TD
+    subgraph Mono["✨ manuscript-core Monorepo ✨"]
+        direction TB
+        Core["📚 manuscript-core"]
+        MakeCLI["make cli"]
+        MakeGUI["make gui"]
+        CLI["🖥️ manuscript-cli<br><i>implemented in Go</i>"]
+        GUI["🎨 manuscript-gui<br><i>implemented in Rust</i>"]
+        InstallCLI["sudo make install-cli"]
+        InstallGUI["sudo make install-gui"]
+
+        Core --> MakeCLI
+        Core --> MakeGUI
+        MakeCLI --> |"builds"| CLI
+        MakeGUI --> |"builds"| GUI
+        CLI --> InstallCLI
+        GUI --> InstallGUI
+        InstallCLI --> |"installs to"| /usr/bin/
+        InstallGUI --> |"installs to"| /usr/bin/
+    end
+
+    style Mono fill:#f0f7ff,stroke:#4a9eff
+    style Core fill:#4a9eff,color:#ffffff,stroke:#0066cc
+    style MakeCLI fill:#00acc1,color:#ffffff,stroke:#007c91
+    style MakeGUI fill:#ff4081,color:#ffffff,stroke:#c60055
+    style CLI fill:#00bcd4,color:#000000,stroke:#008ba3
+    style GUI fill:#ff80ab,color:#000000,stroke:#c94f7c
+    style InstallCLI fill:#00838f,color:#ffffff,stroke:#005662
+    style InstallGUI fill:#c51162,color:#ffffff,stroke:#880e4f
+```
+
+Fortunately, for us, they can both be built and installed together! We'll show how next.
+
+#### Step 1: Git Clone
+
+Clone the `manuscript-core` into the current directory!
+
+```bash
+git clone https://github.com/chainbase-labs/manuscript-core.git
+```
+
+#### Step 2: Make All
+
+```bash
+cd manuscript-core && make all
+```
+
+#### Step 3: Install
+
+```bash
+sudo make install-all
+```
+
+#### Step 4: Test your install
+
+Run this command!
+```bash
+manuscript-cli version -v
+```
+
+""")
+
+
+````
