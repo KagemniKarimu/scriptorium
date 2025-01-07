@@ -16,6 +16,10 @@ Application.put_env(:livebook, :deployment, [
   title: "Scriptorium",
   public_access: true
 ])
+
+port = System.get_env("LIVEBOOK_PORT", "8080")
+hostname = System.get_env("LIVEBOOK_HOSTNAME", "localhost")
+base_url = "http://#{hostname}:#{port}/apps"
 ```
 
 ## 🌐 What is Chainbase Network 🌐
@@ -277,12 +281,15 @@ Clicking one of the buttons above will cause the results to render below!
 ```
 
 ```elixir
+next_link = "#{base_url}/scriptorium-network"
+prev_link = "#{base_url}/scriptorium-intro"
+
 Kino.Markdown.new("""
 
 ### 🧭 Navigation
 
 ⚙️ To view the source code for this project visit https://github.com/KagemniKarimu/scriptorium
 
-**[← Previous: Introduction to Scriptorium](http://localhost:8080/apps/scriptorium-intro) | [Next: Understanding the Chainbase Network →](http://localhost:8080/apps/scriptorium-network)**
+**[← Previous: Introduction to Scriptorium](#{prev_link}) | [Next: Understanding the Chainbase Network →](#{next_link})**
 """)
 ```

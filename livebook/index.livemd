@@ -11,6 +11,10 @@ Application.put_env(:livebook, :deployment, [
   title: "scriptorium",
   public_access: true
 ])
+
+port = System.get_env("LIVEBOOK_PORT", "8080")
+hostname = System.get_env("LIVEBOOK_HOSTNAME", "localhost")
+base_url = "http://#{hostname}:#{port}/apps"
 ```
 
 ## Welcome Page
@@ -40,11 +44,13 @@ Kino.Markdown.new("""
 ```
 
 ```elixir
+next_link = "#{base_url}/scriptorium-intro"
+
 Kino.Markdown.new("""
 ### 🧭 Navigation
 
 ⚙️ To view the source code for this project visit https://github.com/KagemniKarimu/scriptorium
 
-**← Previous: N/A | [Next: Introduction to Scriptorium →](http://localhost:8080/apps/scriptorium-intro)**
+**← Previous: N/A | [Next: Introduction to Scriptorium →](#{next_link})**
 """)
 ```
