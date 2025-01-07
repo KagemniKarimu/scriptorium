@@ -73,6 +73,6 @@ Kino.Markdown.new("""
 
 ⚙️ To view the source code for this project visit https://github.com/KagemniKarimu/scriptorium
 
-**[← Previous: Welcome Page / Index](./index.livemd) | [Next: Understanding Chainbase Network →](./understanding_chainbase_network.livemd)**
+**[← Previous: Welcome Page / Index](http://localhost:8080/apps/scriptorium-index) | [Next: Understanding Chainbase Network →](http://localhost:8080/apps/scriptorium-network)**
 """)
 ```

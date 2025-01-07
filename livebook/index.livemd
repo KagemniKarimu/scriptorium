@@ -31,11 +31,11 @@ Kino.Markdown.new("""
 
 ### 📋 Table of Contents
 
-* Chapter 1: [Introduction to Scriptorium](./introduction.livemd)
-* Chapter 2: [Understanding the Chainbase Network](./getting_started.livemd)
-* Chapter 3: [Manuscripts & Their Mechanisms](./manuscripts_mechanisms.livemd)
-* Chapter 4: [Advanced Features](./advanced_features.livemd)
-* Chapter 5: [Examples and Use Cases](./examples.livemd)
+* Chapter 1: [Introduction to Scriptorium](http://localhost:8080/apps/scriptorium-intro)
+* Chapter 2: [Understanding the Chainbase Network](http://localhost:8080/apps/scriptorium-network)
+* Chapter 3: [Manuscripts & Their Mechanisms]()
+* Chapter 4: [Advanced Features]()
+* Chapter 5: [Examples and Use Cases]()
 """)
 ```
 
@@ -45,6 +45,6 @@ Kino.Markdown.new("""
 
 ⚙️ To view the source code for this project visit https://github.com/KagemniKarimu/scriptorium
 
-**← Previous: N/A | [Next: Introduction to Scriptorium →](./introduction.livemd)**
+**← Previous: N/A | [Next: Introduction to Scriptorium →](http://localhost:8080/apps/scriptorium-intro)**
 """)
 ```
