@@ -1,33 +1,50 @@
 <!-- livebook:{"app_settings":{"access_type":"public","slug":"scriptorium-index"},"file_entries":[{"name":"scriptorium_logo_alpha.png","type":"attachment"}]} -->
 
-# Scriptorium
+# 🔮 scriptorium
 
 ```elixir
+Mix.install([
+  {:kino, "~> 0.12.0"},
+])
+
 Application.put_env(:livebook, :deployment, [
-  title: "Scriptorium",
+  title: "scriptorium",
   public_access: true
 ])
 ```
 
-## ✨ Welcome Page ✨
+## Welcome Page
 
+```elixir
+Kino.Markdown.new("""
 ### 🔍 Overview
 
 The `scriptorium` is an open-source, interactive [livebook](https://hexdocs.pm/livebook/readme.html) that teaches developers about [manuscripts](https://docs.chainbase.com/core-concepts/manuscript/overview).
 ![](files/scriptorium_logo_alpha.png)
 
 `scriptorium` is a tailor-made experience in the spirit of rustlings; it is designed to take a skilled web3 developer from zero-knowledge to expert in the minimum possible time. As such, it can be used as an adjunct to the existing documentation, linked above, and the information available on the [`manuscript-core`](https://https://github.com/chainbase-labs/manuscript-core) github
+""")
+```
 
-## 📋 Table of Contents
+```elixir
+Kino.Markdown.new("""
+
+### 📋 Table of Contents
 
 * Chapter 1: [Introduction to Scriptorium](./introduction.livemd)
 * Chapter 2: [Understanding the Chainbase Network](./getting_started.livemd)
 * Chapter 3: [Manuscripts & Their Mechanisms](./manuscripts_mechanisms.livemd)
 * Chapter 4: [Advanced Features](./advanced_features.livemd)
 * Chapter 5: [Examples and Use Cases](./examples.livemd)
+""")
+```
 
-<!-- livebook:{"break_markdown":true} -->
+```elixir
+Kino.Markdown.new("""
+### 🧭 Navigation
 
 ⚙️ To view the source code for this project visit https://github.com/KagemniKarimu/scriptorium
 
 **← Previous: N/A | [Next: Introduction to Scriptorium →](./introduction.livemd)**
+""")
+```

@@ -1,8 +1,12 @@
-<!-- livebook:{"app_settings":{"access_type":"public","slug":"scriptorium-intro"},"file_entries":[{"name":"scriptorium_intro.png","type":"attachment"},{"name":"scriptorium_logo_alpha.png","type":"attachment"}]} -->
+<!-- livebook:{"app_settings":{"access_type":"public","slug":"scriptorium-intro"},"file_entries":[{"name":"scriptorium_intro.png","type":"attachment"}]} -->
 
-# Introduction to Scriptorium
+# 🔮 scriptorium
 
 ```elixir
+Mix.install([
+  {:kino, "~> 0.12.0"},
+])
+
 Application.put_env(:livebook, :deployment, [
   title: "Scriptorium",
   public_access: true
@@ -10,6 +14,9 @@ Application.put_env(:livebook, :deployment, [
 ```
 
 ## ✨What is scriptorium?✨
+
+```elixir
+Kino.Markdown.new("""
 
 ### 🎓 Learn
 
@@ -46,16 +53,26 @@ Elixir's syntax is readable plus it has many positive features for data: immutab
 
 Our `manuscript-core` makes the claim that you can do things in ANY language! So why not choose Elixir?
 
-## 📖 Simple Definitions
+""")
+```
 
+```elixir
+Kino.Markdown.new("""
+## 📖 Simple Definitions
 📜 `manuscript` - refers to the hosted/published dataset definitions which point, using SQL, to specific data to be served regarding specific protocols
 
 ⏾ `network` - refers to *Chainbase Network*, an omnichain data network serving raw, decoded, and abstracted data from over ~200 web3 protocols
 
 学 `scriptorium` - refers to this interactive livebook, a series of `.livemd` files that contain interactive tutorials designed to bring developers up to speed on using manuscripts to query the network
+""")
+```
 
+```elixir
+Kino.Markdown.new("""
 ## 🧭 Navigation
 
 ⚙️ To view the source code for this project visit https://github.com/KagemniKarimu/scriptorium
 
 **[← Previous: Welcome Page / Index](./index.livemd) | [Next: Understanding Chainbase Network →](./understanding_chainbase_network.livemd)**
+""")
+```
