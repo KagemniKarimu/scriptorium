@@ -8,7 +8,7 @@ Mix.install([
 ])
 
 Application.put_env(:livebook, :deployment, [
-  title: "Scriptorium",
+  title: "scriptorium",
   public_access: true
 ])
 

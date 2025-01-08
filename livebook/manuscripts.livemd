@@ -1,6 +1,6 @@
 <!-- livebook:{"app_settings":{"access_type":"public","slug":"scriptorium-manuscripts"},"file_entries":[{"name":"manuscripts_mechanics.png","type":"attachment"}]} -->
 
-# 🔮 scriptorium - fork
+# 🔮 scriptorium
 
 ```elixir
 Mix.install([
@@ -13,7 +13,7 @@ Mix.install([
 ])
 
 Application.put_env(:livebook, :deployment, [
-  title: "Scriptorium",
+  title: "scriptorium",
   public_access: true
 ])
 
