@@ -17,76 +17,137 @@ Application.put_env(:livebook, :deployment, [
   public_access: true
 ])
 
+port = System.get_env("LIVEBOOK_PORT", "8080")
+hostname = System.get_env("LIVEBOOK_HOSTNAME", "localhost")
+base_url = "http://#{hostname}:#{port}/apps"
+
 ```
 
 ## Section
 
-````elixir
-
-
+```elixir
 import Kino.Shorts
-
-version_check = """
-Git version:
-#{elem(System.cmd("git", ["--version"]), 0)}
-
-Make version:
-#{elem(System.cmd("make", ["--version"]), 0)}
-
-GO version:
-#{elem(System.cmd("go", ["version"]), 0)}
-
-Rust version:
-#{elem(System.cmd("cargo", ["version"]), 0)}
-"""
-
-Kino.Markdown.new(version_check) |> Kino.render()
-
 
 markdown("""
 ![](files/manuscripts_mechanics.png)
 
-### Get Started with Manuscripts
+### Get Started with Manuscripts 
 
-Now, that you have understood the basic network primitives, we can get into the specifics of manuscript mechanics. There is much to learn about manuscripts, but the main thing to understand is that they are fairly simple to create and maintain.
+Now that you have understood the basic network primitives, we can get into the specifics of manuscript mechanics. Let's start by understanding what we need for development.
 
-Let's get started with a hands-on approach!
+Before we dive into *installation*, it's worth noting that we have two paths forward:
+1. we can build from source
+2. we can use pre-built binaries. 
+
+Building from source gives us the most control and access to the latest developments, including unreleased features and improvements. However, if you prefer a simpler approach, you can always download the latest stable release from the [GitHub releases page](https://github.com/chainbase-labs/manuscript-core/releases) or use the [scripts](https://github.com/chainbase-labs/manuscript-core?tab=readme-ov-file#getting-started-) which do it for you. We'll focus on building from source in this guide, as it provides the most comprehensive understanding of the manuscript tools.
+
+
+`manuscript-core` requires several development tools to build and run properly. You might be running this Livebook either through a Docker container (where these requirements are pre-installed) or on your local machine. Let's examine the current environment to understand what tools are available:
 """) |> Kino.render()
 
+# Helper function defined as a variable
+get_version = fn command, args ->
+  try do
+    {output, 0} = System.cmd(command, args)
+    {:ok, String.trim(output)}
+  rescue
+    # Handle command not found
+    ErlangError -> {:error, "Not installed"}
+    # Handle other potential errors
+    _ -> {:error, "Error checking version"}
+  end
+end
 
-buttons = [
-  Kino.Control.button("test") ,
-  Kino.Control.button("test") ,
-  Kino.Control.button("test") ,
-]
+# Create frame and toggle button
+version_frame = Kino.Frame.new()
+toggle_button = Kino.Control.button("🔧 Check Development Requirements")
 
-grid(
-  buttons,
-  [columns: 3, boxed: true, gap: 8]
-) |> Kino.render()
+# Create an agent to store the visibility state
+{:ok, state_agent} = Agent.start_link(fn -> false end)
 
+# Create a styled box for our button
+Kino.Layout.grid([toggle_button], boxed: true, gap: 8) |> Kino.render()
+version_frame |> Kino.render()
 
-Kino.HTML.new("""
-<br />
-<br />
-<hr />
+# Add listener with toggle logic using agent
+Kino.listen(toggle_button, fn _ ->
+  new_state = Agent.get_and_update(state_agent, fn current_state -> 
+    new_state = !current_state
+    {new_state, new_state}
+  end)
+  
+  if new_state do
+    # Safely get versions with proper formatting
+    git_version = case get_version.("git", ["--version"]) do
+      {:ok, output} -> output
+      {:error, msg} -> "❌ #{msg}"
+    end
+    
+    make_version = case get_version.("make", ["--version"]) do
+      {:ok, output} -> 
+        output
+        |> String.split("\n")
+        |> List.first()
+      {:error, msg} -> "❌ #{msg}"
+    end
+    
+    go_version = case get_version.("go", ["version"]) do
+      {:ok, output} -> output
+      {:error, msg} -> "❌ #{msg}"
+    end
+    
+    cargo_version = case get_version.("cargo", ["--version"]) do
+      {:ok, output} -> output
+      {:error, msg} -> "❌ #{msg}"
+    end
 
-<br />
+    # Check if any tools are missing
+    all_installed = not (
+      String.contains?(git_version, "❌") or
+      String.contains?(make_version, "❌") or
+      String.contains?(go_version, "❌") or
+      String.contains?(cargo_version, "❌")
+    )
 
-""") |> Kino.render()
+    version_check = """
+    ### Development Requirements Status
+    
+    >    These are the development tools available in the current environment:
+    >
+    >    | Tool | Version | Required For |
+    >    |------|---------|-------------|
+    >    | Git  | #{git_version} | Repository management |
+    >    | Make | #{make_version} | Build automation |
+    >    | Go   | #{go_version} | manuscript-cli |
+    >    | Rust | #{cargo_version} | manuscript-gui |
+    
+    #{if not all_installed do
+      """
+      ⚠️ Some required tools are missing. You'll need to install them before proceeding with the build process.
+      If you're using the Docker container, this might indicate an issue with the container setup.
+      """
+    else
+      "✅ All required tools are available."
+    end}
+    """
+    Kino.Frame.render(version_frame, Kino.Markdown.new(version_check))
+  else
+    Kino.Frame.render(version_frame, Kino.Markdown.new(""))
+  end
+end)
 
-make_chart =
+Kino.Markdown.new("""
+""")
+```
 
-
+````elixir
 markdown("""
-#### Build From Source
+#### Understanding the Build Process
 
-To get started, we're going to build the [`manuscript-core`](https://github.com/chainbase-labs/manuscript-core) from source.
-`manuscript-core` is a monorepository from which we can compile both `manuscript-cli` and `manuscript-gui` binaries. There are separate interfaces implemented for each as shown below.
+`manuscript-core` is a monorepository containing both `manuscript-cli` (implemented in Go) and `manuscript-gui` (implemented in Rust). Here's how the components work together:
 
 ```mermaid
 %%{init: {'theme': 'base', 'themeVariables': { 'fontSize': '16px'}, "htmlLabels": true}}%%
-
 flowchart TD
     subgraph Mono["✨ manuscript-core Monorepo ✨"]
         direction TB
@@ -119,35 +180,285 @@ flowchart TD
 ```
 
 Fortunately, for us, they can both be built and installed together! We'll show how next.
-
-#### Step 1: Git Clone
-
-Clone the `manuscript-core` into the current directory!
-
-```bash
-git clone https://github.com/chainbase-labs/manuscript-core.git
-```
-
-#### Step 2: Make All
-
-```bash
-cd manuscript-core && make all
-```
-
-#### Step 3: Install
-
-```bash
-sudo make install-all
-```
-
-#### Step 4: Test your install
-
-Run this command!
-```bash
-manuscript-cli version -v
-```
-
 """)
+````
 
+````elixir
+repo_url = "https://github.com/chainbase-labs/manuscript-core.git"
+build_dir = "manuscript-core"
+
+# Utility functions
+create_tree = fn dir_path ->
+  case System.cmd("sh", ["-c", "tree -L 2 #{dir_path}"], stderr_to_stdout: true) do
+    {output, 0} -> 
+      Kino.Markdown.new("""
+      📂 Working Directory Structure:
+      #{output}
+      """)
+    _ -> 
+      Kino.Markdown.new("Unable to get directory structure")
+  end
+end
+
+create_path_viz = fn ->
+  {output, 0} = System.cmd("pwd", [], stderr_to_stdout: true)
+  current_path = String.trim(output)
+  parts = String.split(current_path, "/", trim: true)
+
+  viz = parts
+  |> Enum.with_index()
+  |> Enum.map(fn {part, idx} ->
+    padding = String.duplicate(" ", idx * 2)
+    connector = if idx == 0, do: "", else: "└─"
+    "#{padding}#{connector}📂 #{part}"
+  end)
+  |> Enum.join("\n")
+
+  Kino.Markdown.new("""
+  ### 🗺️ Current Directory
+  #{viz}
+  """)
+end
+
+stream_command = fn command, frame ->
+  port = Port.open({:spawn, "/bin/sh -c '#{command}'"}, [:binary, :exit_status, :stderr_to_stdout])
+  
+  stream_output = fn stream_output, port, accumulated_output ->
+    receive do
+      {^port, {:data, new_output}} ->
+        updated_output = accumulated_output <> new_output
+        Kino.Frame.render(frame, Kino.Markdown.new("""
+        ```
+        #{updated_output}
+        ```
+        """))
+        stream_output.(stream_output, port, updated_output)
+        
+      {^port, {:exit_status, status}} ->
+        final_output = accumulated_output <> "\nProcess completed (status: #{status})"
+        Kino.Frame.render(frame, Kino.Markdown.new("""
+        ```
+        #{final_output}
+        ```
+        """))
+        status == 0
+        
+      _other ->
+        stream_output.(stream_output, port, accumulated_output)
+    end
+  end
+
+  stream_output.(stream_output, port, "")
+end
 
 ````
+
+```elixir
+frames = %{
+  viz: Kino.Frame.new(),
+  status: Kino.Frame.new(),
+  clone: Kino.Frame.new(),
+  make: Kino.Frame.new(),
+  install: Kino.Frame.new(),
+  verify: Kino.Frame.new()
+}
+
+# Button setup
+buttons = %{
+  clone: Kino.Control.button("Clone Repository"),
+  make: Kino.Control.button("Make All"),
+  install: Kino.Control.button("Install"),
+  verify: Kino.Control.button("Verify Installation")
+}
+
+# Initialize build state
+{:ok, build_state} = Agent.start_link(fn -> %{
+  clone_complete: false,
+  make_complete: false,
+  install_complete: false,
+  verify_complete: false
+} end)
+
+# Status rendering
+render_status = fn state ->
+  steps = [
+    {"Repository Clone", state.clone_complete},
+    {"Build Process", state.make_complete},
+    {"Installation", state.install_complete},
+    {"Verification", state.verify_complete}
+  ]
+
+  status_text = steps
+  |> Enum.map(fn {name, complete} ->
+    status = if complete, do: "✅", else: "⏳"
+    "#{status} #{name}"
+  end)
+  |> Enum.join("\n")
+
+  Kino.Markdown.new("### Build Progress\n#{status_text}")
+end
+```
+
+````elixir
+# Clone Repository handler
+Kino.listen(buttons.clone, fn _event -> 
+  Kino.Frame.render(frames.clone, Kino.Markdown.new("Starting repository clone..."))
+  
+  Task.async(fn ->
+    System.cmd("rm", ["-rf", build_dir])
+    
+    success = stream_command.(
+      "git clone #{repo_url}",
+      frames.clone
+    )
+    
+    if success do
+      Agent.update(build_state, &Map.put(&1, :clone_complete, true))
+      Kino.Frame.render(frames.status, render_status.(Agent.get(build_state, & &1)))
+      Kino.Frame.render(frames.viz, create_path_viz.())
+      Kino.Frame.render(frames.viz, create_tree.("."))
+    end
+  end)
+end)
+
+# Make All handler
+Kino.listen(buttons.make, fn _event -> 
+  state = Agent.get(build_state, & &1)
+
+  if not state.clone_complete do
+    Kino.Frame.render(frames.make, Kino.Markdown.new("""
+    ```
+    ⚠️ Error: Cannot proceed - Repository clone has not completed successfully
+    ```
+    """))
+  else
+    Kino.Frame.render(frames.make, Kino.Markdown.new("Starting build process..."))
+    
+    Task.async(fn ->
+      build_steps = """
+      cd manuscript-core && \
+      make all 2>&1
+      """
+      
+      build_success = stream_command.(build_steps, frames.make)
+      
+      if build_success do
+        # Update visualization
+        Kino.Frame.render(frames.viz, create_path_viz.())
+        Kino.Frame.render(frames.viz, create_tree.("."))
+        
+        Agent.update(build_state, fn state -> 
+          Map.put(state, :make_complete, true)
+        end)
+        Kino.Frame.render(frames.status, render_status.(Agent.get(build_state, & &1)))
+        
+        Kino.Frame.render(frames.make, Kino.Markdown.new("""
+        ```
+        🎉🎉🎉 Build completed successfully! 🎉🎉🎉
+        ```
+        """))
+      end
+    end)
+  end
+end)
+
+# Install handler
+Kino.listen(buttons.install, fn _event -> 
+  state = Agent.get(build_state, & &1)
+
+  if not state.make_complete do
+    Kino.Frame.render(frames.install, Kino.Markdown.new("""
+    ```
+    ⚠️ Error: Build not completed
+    ```
+    """))
+  else
+    Kino.Frame.render(frames.install, Kino.Markdown.new("Starting installation..."))
+    
+    Task.async(fn ->
+      install_command = """
+      cd #{build_dir} && \
+      make install-all 2>&1
+      """
+      
+      success = stream_command.(install_command, frames.install)
+      Agent.update(build_state, &Map.put(&1, :install_complete, true))
+      
+      if success do
+        Kino.Frame.render(frames.status, render_status.(Agent.get(build_state, & &1)))
+      else
+        Kino.Frame.render(frames.install, Kino.Markdown.new("""
+        ```
+        ⚠️ Installation requires elevated privileges. Please run 'sudo make install-all' from the terminal.
+        ```
+        """))
+      end
+    end)
+  end
+end)
+
+# Verify Installation handler
+Kino.listen(buttons.verify, fn _event -> 
+  state = Agent.get(build_state, & &1)
+
+  if not state.install_complete do
+    Kino.Frame.render(frames.verify, Kino.Markdown.new("""
+    ```
+    ⚠️ Error: Installation not completed
+    ```
+    """))
+  else
+    Kino.Frame.render(frames.verify, Kino.Markdown.new("Verifying installation..."))
+    
+    Task.async(fn ->
+      success = stream_command.("manuscript-cli version -v", frames.verify)
+      
+      if success do
+        Agent.update(build_state, &Map.put(&1, :verify_complete, true))
+        Kino.Frame.render(frames.status, render_status.(Agent.get(build_state, & &1)))
+      end
+    end)
+  end
+end)
+
+Kino.Frame.render(frames.status, render_status.(Agent.get(build_state, & &1)))
+
+# Create and render the full layout
+Kino.Layout.grid([
+  frames.viz,
+  frames.status,
+  Kino.Layout.grid([
+    Kino.Markdown.new("### Step 1: Clone the Repository"),
+    buttons.clone
+  ], columns: 2),
+  frames.clone,
+  Kino.Layout.grid([
+    Kino.Markdown.new("### Step 2: Build All Components"),
+    buttons.make
+  ], columns: 2),
+  frames.make,
+  Kino.Layout.grid([
+    Kino.Markdown.new("### Step 3: Install"),
+    buttons.install
+  ], columns: 2),
+  frames.install,
+  Kino.Layout.grid([
+    Kino.Markdown.new("### Step 4: Verify Installation"),
+    buttons.verify
+  ], columns: 2),
+  frames.verify
+])
+````
+
+```elixir
+next_link = "#{base_url}/scriptorium-manuscripts"
+prev_link = "#{base_url}/scriptorium-network"
+
+Kino.Markdown.new("""
+### 🧭 Navigation
+
+⚙️ To view the source code for this project visit https://github.com/KagemniKarimu/scriptorium
+
+**[← Previous: Understanding the Chainbase Network](#{prev_link}) | [Next: Manuscripts & Their Mechanisms →](#{next_link})**
+""")
+```
