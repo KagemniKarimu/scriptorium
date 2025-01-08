@@ -31,13 +31,13 @@ import Kino.Shorts
 markdown("""
 ![](files/manuscripts_mechanics.png)
 
-### Get Started with Manuscripts 
+### Get Started with Manuscripts
 
 Now that you have understood the basic network primitives, we can get into the specifics of manuscript mechanics. Let's start by understanding what we need for development.
 
 Before we dive into *installation*, it's worth noting that we have two paths forward:
 1. we can build from source
-2. we can use pre-built binaries. 
+2. we can use pre-built binaries.
 
 Building from source gives us the most control and access to the latest developments, including unreleased features and improvements. However, if you prefer a simpler approach, you can always download the latest stable release from the [GitHub releases page](https://github.com/chainbase-labs/manuscript-core/releases) or use the [scripts](https://github.com/chainbase-labs/manuscript-core?tab=readme-ov-file#getting-started-) which do it for you. We'll focus on building from source in this guide, as it provides the most comprehensive understanding of the manuscript tools.
 
@@ -71,31 +71,31 @@ version_frame |> Kino.render()
 
 # Add listener with toggle logic using agent
 Kino.listen(toggle_button, fn _ ->
-  new_state = Agent.get_and_update(state_agent, fn current_state -> 
+  new_state = Agent.get_and_update(state_agent, fn current_state ->
     new_state = !current_state
     {new_state, new_state}
   end)
-  
+
   if new_state do
     # Safely get versions with proper formatting
     git_version = case get_version.("git", ["--version"]) do
       {:ok, output} -> output
       {:error, msg} -> "❌ #{msg}"
     end
-    
+
     make_version = case get_version.("make", ["--version"]) do
-      {:ok, output} -> 
+      {:ok, output} ->
         output
         |> String.split("\n")
         |> List.first()
       {:error, msg} -> "❌ #{msg}"
     end
-    
+
     go_version = case get_version.("go", ["version"]) do
       {:ok, output} -> output
       {:error, msg} -> "❌ #{msg}"
     end
-    
+
     cargo_version = case get_version.("cargo", ["--version"]) do
       {:ok, output} -> output
       {:error, msg} -> "❌ #{msg}"
@@ -111,7 +111,7 @@ Kino.listen(toggle_button, fn _ ->
 
     version_check = """
     ### Development Requirements Status
-    
+
     >    These are the development tools available in the current environment:
     >
     >    | Tool | Version | Required For |
@@ -120,7 +120,7 @@ Kino.listen(toggle_button, fn _ ->
     >    | Make | #{make_version} | Build automation |
     >    | Go   | #{go_version} | manuscript-cli |
     >    | Rust | #{cargo_version} | manuscript-gui |
-    
+
     #{if not all_installed do
       """
       ⚠️ Some required tools are missing. You'll need to install them before proceeding with the build process.
@@ -190,12 +190,12 @@ build_dir = "manuscript-core"
 # Utility functions
 create_tree = fn dir_path ->
   case System.cmd("sh", ["-c", "tree -L 2 #{dir_path}"], stderr_to_stdout: true) do
-    {output, 0} -> 
+    {output, 0} ->
       Kino.Markdown.new("""
       📂 Working Directory Structure:
       #{output}
       """)
-    _ -> 
+    _ ->
       Kino.Markdown.new("Unable to get directory structure")
   end
 end
@@ -222,7 +222,7 @@ end
 
 stream_command = fn command, frame ->
   port = Port.open({:spawn, "/bin/sh -c '#{command}'"}, [:binary, :exit_status, :stderr_to_stdout])
-  
+
   stream_output = fn stream_output, port, accumulated_output ->
     receive do
       {^port, {:data, new_output}} ->
@@ -233,7 +233,7 @@ stream_command = fn command, frame ->
         ```
         """))
         stream_output.(stream_output, port, updated_output)
-        
+
       {^port, {:exit_status, status}} ->
         final_output = accumulated_output <> "\nProcess completed (status: #{status})"
         Kino.Frame.render(frame, Kino.Markdown.new("""
@@ -242,7 +242,7 @@ stream_command = fn command, frame ->
         ```
         """))
         status == 0
-        
+
       _other ->
         stream_output.(stream_output, port, accumulated_output)
     end
@@ -301,17 +301,17 @@ end
 
 ````elixir
 # Clone Repository handler
-Kino.listen(buttons.clone, fn _event -> 
+Kino.listen(buttons.clone, fn _event ->
   Kino.Frame.render(frames.clone, Kino.Markdown.new("Starting repository clone..."))
-  
+
   Task.async(fn ->
     System.cmd("rm", ["-rf", build_dir])
-    
+
     success = stream_command.(
       "git clone #{repo_url}",
       frames.clone
     )
-    
+
     if success do
       Agent.update(build_state, &Map.put(&1, :clone_complete, true))
       Kino.Frame.render(frames.status, render_status.(Agent.get(build_state, & &1)))
@@ -322,7 +322,7 @@ Kino.listen(buttons.clone, fn _event ->
 end)
 
 # Make All handler
-Kino.listen(buttons.make, fn _event -> 
+Kino.listen(buttons.make, fn _event ->
   state = Agent.get(build_state, & &1)
 
   if not state.clone_complete do
@@ -333,25 +333,25 @@ Kino.listen(buttons.make, fn _event ->
     """))
   else
     Kino.Frame.render(frames.make, Kino.Markdown.new("Starting build process..."))
-    
+
     Task.async(fn ->
       build_steps = """
       cd manuscript-core && \
       make all 2>&1
       """
-      
+
       build_success = stream_command.(build_steps, frames.make)
-      
+
       if build_success do
         # Update visualization
         Kino.Frame.render(frames.viz, create_path_viz.())
         Kino.Frame.render(frames.viz, create_tree.("."))
-        
-        Agent.update(build_state, fn state -> 
+
+        Agent.update(build_state, fn state ->
           Map.put(state, :make_complete, true)
         end)
         Kino.Frame.render(frames.status, render_status.(Agent.get(build_state, & &1)))
-        
+
         Kino.Frame.render(frames.make, Kino.Markdown.new("""
         ```
         🎉🎉🎉 Build completed successfully! 🎉🎉🎉
@@ -363,7 +363,7 @@ Kino.listen(buttons.make, fn _event ->
 end)
 
 # Install handler
-Kino.listen(buttons.install, fn _event -> 
+Kino.listen(buttons.install, fn _event ->
   state = Agent.get(build_state, & &1)
 
   if not state.make_complete do
@@ -374,16 +374,16 @@ Kino.listen(buttons.install, fn _event ->
     """))
   else
     Kino.Frame.render(frames.install, Kino.Markdown.new("Starting installation..."))
-    
+
     Task.async(fn ->
       install_command = """
       cd #{build_dir} && \
       make install-all 2>&1
       """
-      
+
       success = stream_command.(install_command, frames.install)
       Agent.update(build_state, &Map.put(&1, :install_complete, true))
-      
+
       if success do
         Kino.Frame.render(frames.status, render_status.(Agent.get(build_state, & &1)))
       else
@@ -398,7 +398,7 @@ Kino.listen(buttons.install, fn _event ->
 end)
 
 # Verify Installation handler
-Kino.listen(buttons.verify, fn _event -> 
+Kino.listen(buttons.verify, fn _event ->
   state = Agent.get(build_state, & &1)
 
   if not state.install_complete do
@@ -409,10 +409,10 @@ Kino.listen(buttons.verify, fn _event ->
     """))
   else
     Kino.Frame.render(frames.verify, Kino.Markdown.new("Verifying installation..."))
-    
+
     Task.async(fn ->
       success = stream_command.("manuscript-cli version -v", frames.verify)
-      
+
       if success do
         Agent.update(build_state, &Map.put(&1, :verify_complete, true))
         Kino.Frame.render(frames.status, render_status.(Agent.get(build_state, & &1)))
