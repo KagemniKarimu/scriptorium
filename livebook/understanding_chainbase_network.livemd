@@ -13,7 +13,7 @@ Mix.install([
 ])
 
 Application.put_env(:livebook, :deployment, [
-  title: "Scriptorium",
+  title: "scriptorium",
   public_access: true
 ])
 
@@ -218,64 +218,124 @@ graph LR
 ```
 
 ```elixir
-# Make the HTTP request
-response = Req.get!("https://api.chainbase.com/api/v1/metadata/network_chains")
+# Create frames for our different outputs
+table_frame = Kino.Frame.new()
+summary_frame = Kino.Frame.new()
 
-# Parse the response body
-chains = response.body["graphData"]
-|> Enum.map(fn item ->
-  %{
-    name: item["chain"]["name"],
-    status: item["chain"]["status"],
-    block_height: item["chain"]["blockHeight"],
-    data_volume: item["chain"]["dataVolume"],
-    last_update: item["chain"]["lastUpdate"]
+# Helper functions defined as variables
+fetch_data = fn ->
+  url = "https://api.chainbase.com/api/v1/metadata/network_chains"
+  response = Req.get!(url)
+  
+  # Extract response metadata
+  api_info = %{
+    method: "GET",
+    response_code: response.body["code"],
+    message: response.body["message"]
   }
-end)
+  
+  # Process chains data
+  chains = response.body["graphData"]
+  |> Enum.map(fn item ->
+    %{
+      name: item["chain"]["name"],
+      status: item["chain"]["status"],
+      block_height: item["chain"]["blockHeight"],
+      data_volume: item["chain"]["dataVolume"],
+      last_update: item["chain"]["lastUpdate"]
+    }
+  end)
+  
+  # Calculate summary statistics
+  summary = %{
+    total_chains: length(chains),
+    online_chains: Enum.count(chains, & &1.status == "Online"),
+    total_data_volume: Enum.sum(Enum.map(chains, & &1.data_volume))
+  }
+  
+  {chains, summary, api_info}
+end
 
-# Get summary statistics
-summary = %{
-  total_chains: length(chains),
-  online_chains: Enum.count(chains, & &1.status == "Online"),
-  total_data_volume: Enum.sum(Enum.map(chains, & &1.data_volume))
-}
+create_api_info_text = fn api_info ->
+  Kino.Markdown.new("""
+  ### API Request Details
+  
+  📡 **Response**
+  - `#{api_info.method}`
+  - Code: #{api_info.response_code}
+  - Message: #{api_info.message}
+  """)
+end
 
-# Calculate percentage of online chains for the meter
-online_percentage = (summary.online_chains / summary.total_chains * 100) |> round()
-meter_filled = String.duplicate("█", div(round(online_percentage), 5))
-meter_empty = String.duplicate("░", 20 - div(round(online_percentage), 5))
+create_summary_text = fn summary ->
+  online_percentage = (summary.online_chains / summary.total_chains * 100) |> round()
+  meter_filled = String.duplicate("█", div(round(online_percentage), 5))
+  meter_empty = String.duplicate("░", 20 - div(round(online_percentage), 5))
+  
+  Kino.Markdown.new("""
+  #### Network Summary
+  
+  🔵 **Total Chains**: #{summary.total_chains}
+  
+  🟢 **Online Chains**: #{summary.online_chains} / #{summary.total_chains}
+  
+  #{meter_filled}#{meter_empty} #{online_percentage}% online
+  
+  💾 **Total Data Volume**: #{summary.total_data_volume} GB
+  
+  *Last updated: #{DateTime.utc_now() |> Calendar.strftime("%Y-%m-%d %H:%M:%S UTC")}*
+  """)
+end
 
-### Create Network Summary for displaying later
-network_summary_text = Kino.Markdown.new("""
-#### Network Summary
-
-🔵 **Total Chains**: #{summary.total_chains} \n
-🟢 **Online Chains**: #{summary.online_chains} / #{summary.total_chains}
-
-#{meter_filled}#{meter_empty} #{online_percentage}% online
-
-💾 **Total Data Volume**: #{summary.total_data_volume} GB
-""")
-
-
+# Create and render the section header
 Kino.Markdown.new("""
-
 ### Available Data
-
-We can query the network directly using the `https://api.chainbase.com/api/v1/metadata/network_chains` endpoint to learn about the status of the network.
+We can query the network directly using a `GET` request on the `https://api.chainbase.com/api/v1/metadata/network_chains` endpoint to learn about the status of the network. For your convenience, the results of this request are displayed below.
 """) |> Kino.render()
 
-Kino.Control.button("Get All Chains Status")
-  |> Kino.render()
-  |> Kino.listen(fn _event -> Kino.render(Kino.DataTable.new(chains)) end)
+# Create refresh button and loading indicator
+refresh_button = Kino.Control.button("Refresh Network Status")
+loading_frame = Kino.Frame.new()
 
+# Render table frame
+table_frame |> Kino.render()
 
-(Kino.Control.button("Get Network Summary")
-  |> Kino.render()
-  |> Kino.listen(fn _event -> Kino.render(network_summary_text) end))
+# Create frames for API info and summary
+api_info_frame = Kino.Frame.new()
+
+# Create bottom section with API info and summary side by side
+Kino.Layout.grid([api_info_frame, summary_frame], columns: 2) |> Kino.render()
+
+# Create a boxed grid layout for the button and loading indicator
+Kino.Layout.grid([
+  refresh_button,
+  loading_frame
+], columns: 2, boxed: true) |> Kino.render()
+
+# Update function
+refresh_data = fn ->
+  {chains, summary, api_info} = fetch_data.()
+  Kino.Frame.render(table_frame, Kino.DataTable.new(chains))
+  Kino.Frame.render(api_info_frame, create_api_info_text.(api_info))
+  Kino.Frame.render(summary_frame, create_summary_text.(summary))
+end
+
+# Add button listener with simple loading indicator
+Kino.listen(refresh_button, fn _ -> 
+  Kino.Frame.render(loading_frame, Kino.Markdown.new("Loading ⏳⏳⏳"))
+  refresh_data.()
+  Kino.Frame.render(loading_frame, Kino.Markdown.new("✅"))
+end)
+
+# Initial data load with loading indicator
+Kino.Frame.render(loading_frame, Kino.Markdown.new("Loading ⏳⏳⏳"))
+refresh_data.()
+Kino.Frame.render(loading_frame, Kino.Markdown.new("✅"))
 
 Kino.Markdown.new("""
-Clicking one of the buttons above will cause the results to render below!
+
+Take a second to persue the data that has been shared above. You can filter and search as needed to explore the chains available. This is a great interactive tool to learn a little bit more about what is meant by **omnichain** network.
+
 """)
 
 ```
