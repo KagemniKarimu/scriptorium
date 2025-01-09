@@ -9,7 +9,7 @@ Mix.install([
   # JSON parser
   {:jason, "~> 1.4"},
   # For visualization
-  {:kino, "~> 0.12.0"},
+  {:kino, "~> 0.14.2"},
 ])
 
 Application.put_env(:livebook, :deployment, [
