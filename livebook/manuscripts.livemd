@@ -7,7 +7,7 @@ Mix.install([
   # HTTP client
   {:req, "~> 0.5.8"},
   # JSON parser
-  {:jason, "~> 1.4"},
+  {:jason, "~> 1.4.4"},
   # For visualization
   {:kino, "~> 0.14.2"},
 ])
