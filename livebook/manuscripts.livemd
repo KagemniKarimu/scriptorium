@@ -1,4 +1,4 @@
-<!-- livebook:{"app_settings":{"access_type":"public","slug":"scriptorium-manuscripts"},"file_entries":[{"name":"manuscripts_mechanics.png","type":"attachment"}]} -->
+<!-- livebook:{"app_settings":{"access_type":"public","slug":"scriptorium-manuscripts"},"file_entries":[{"name":"GUI_Screencast.mp4","type":"attachment"},{"name":"manuscripts_mechanics.png","type":"attachment"}]} -->
 
 # 🔮 scriptorium
 
@@ -220,6 +220,7 @@ stream_command = fn command, frame ->
   stream_output.(stream_output, port, "")
 end
 
+Kino.nothing()
 ````
 
 ```elixir
@@ -233,10 +234,10 @@ frames = %{
 
 # Button setup
 buttons = %{
-  clone: Kino.Control.button("Clone Repository"),
-  make: Kino.Control.button("Make All"),
-  install: Kino.Control.button("Install"),
-  verify: Kino.Control.button("Verify Installation")
+  clone: Kino.Control.button("▶️ Run on Livebook"),
+  make: Kino.Control.button("▶️ Run on Livebook"),
+  install: Kino.Control.button("▶️ Run on Livebook"),
+  verify: Kino.Control.button("▶️ Run on Livebook")
 }
 
 # Initialize build state
@@ -266,6 +267,7 @@ render_status = fn state ->
   Kino.Markdown.new("### Build Progress\n#{status_text}")
 end
 
+Kino.nothing()
 ```
 
 ````elixir
@@ -353,7 +355,7 @@ Kino.listen(buttons.install, fn _event ->
       else
         Kino.Frame.render(frames.install, Kino.Markdown.new("""
         ```
-        ⚠️ Installation requires elevated privileges. Please run 'sudo make install-all' from the terminal.
+        ⚠️ Installation requires elevated privileges. Please run 'sudo make install' from the terminal.
         ```
         """))
       end
@@ -387,31 +389,105 @@ end)
 
 Kino.Frame.render(frames.status, render_status.(Agent.get(build_state, & &1)))
 
+# Initialize frames with command previews
+frame_previews = %{
+  clone: """
+  ```bash
+  $ git clone https://github.com/chainbase-labs/manuscript-core.git
+  ```
+  """,
+  make: """
+  ```bash
+  $ cd manuscript-core && make all
+  ```
+  """,
+  install: """
+  ```bash
+  $ sudo make install
+  ```
+  """,
+  verify: """
+  ```bash
+  $ manuscript-cli version -v
+  ```
+  """
+}
+
+# Initialize each frame with its preview
+for {frame_key, preview} <- frame_previews do
+  Kino.Frame.render(frames[frame_key], Kino.Markdown.new(preview))
+end
+
+
 # Create and render the full layout
+# Final layout with descriptions and right-aligned buttons
 Kino.Layout.grid([
   frames.status,
+  
+  # Step 1
   Kino.Layout.grid([
-    Kino.Markdown.new("### Step 1: Clone the Repository"),
+    Kino.Markdown.new("### 🔵 Step 1: Clone the Repository"),
     buttons.clone
-  ], columns: 2),
+  ], columns: 2, gap: 300),
+  Kino.Markdown.new("Downloads the latest manuscript source code from GitHub."),
   frames.clone,
+  
+  # Step 2
   Kino.Layout.grid([
-    Kino.Markdown.new("### Step 2: Build All Components"),
+    Kino.Markdown.new("### 🔵 Step 2: Build All Components"),
     buttons.make
-  ], columns: 2),
+  ], columns: 2, gap: 300),
+  Kino.Markdown.new("Compiles both the CLI and GUI components, respectively. This will take several minutes to collect required packages."),
   frames.make,
+  
+  # Step 3
   Kino.Layout.grid([
-    Kino.Markdown.new("### Step 3: Install"),
+    Kino.Markdown.new("### 🔵 Step 3: Install"),
     buttons.install
-  ], columns: 2),
+  ], columns: 2, gap: 300),
+  Kino.Markdown.new("Installs the compiled binaries to your system. The Makefile places them in `/usr/bin/` or an appropriate execution path."),
   frames.install,
+  
+  # Step 4
   Kino.Layout.grid([
-    Kino.Markdown.new("### Step 4: Verify Installation"),
+    Kino.Markdown.new("### 🔵 Step 4: Verify Installation"),
     buttons.verify
-  ], columns: 2),
+  ], columns: 2, gap: 300),
+  Kino.Markdown.new("Confirms the installation was successful by running the `manuscript-cli version --verbose` command."),
   frames.verify
 ])
+
 ````
+
+```elixir
+Kino.Markdown.new("""
+
+### Congratulations 🎉 
+
+Now, that you've installed the tools, you're ready to get started tinkering with actual manuscripts. To begin with, it's best to understand that there's a difference between the `GUI` and `CLI`.
+
+#### `manusript-gui`
+
+`manuscript-gui` is built from Rust as a Textual User Interface (TUI) tool to be used from a Terminal window. It provides a graphical experience customizing, configuring, testing, and deploying manuscripts. When working with manuscripts in the wild, it is the preferred route. 
+
+""") |> Kino.render()
+
+content =
+  Kino.FS.file_path("GUI_Screencast.mp4")
+  |> File.read!()
+  |> Kino.Video.new(:mp4,autoplay: true, loop: true)
+  |> Kino.render()
+
+Kino.Markdown.new("""
+
+Presently, full TUI apps are not supported from Livebook, so o
+
+#### `manuscript-cli`
+
+`manuscript-gui` is built from Golang as a Command Line Interface (CLI) tool to be used from a Terminal window as well. 
+It gives us a programmable interface for making and building manuscripts.
+""")
+```
 
 ```elixir
 next_link = "#{base_url}/scriptorium-manuscripts"
