@@ -188,37 +188,6 @@ repo_url = "https://github.com/chainbase-labs/manuscript-core.git"
 build_dir = "manuscript-core"
 
 # Utility functions
-create_tree = fn dir_path ->
-  case System.cmd("sh", ["-c", "tree -L 2 #{dir_path}"], stderr_to_stdout: true) do
-    {output, 0} ->
-      Kino.Markdown.new("""
-      📂 Working Directory Structure:
-      #{output}
-      """)
-    _ ->
-      Kino.Markdown.new("Unable to get directory structure")
-  end
-end
-
-create_path_viz = fn ->
-  {output, 0} = System.cmd("pwd", [], stderr_to_stdout: true)
-  current_path = String.trim(output)
-  parts = String.split(current_path, "/", trim: true)
-
-  viz = parts
-  |> Enum.with_index()
-  |> Enum.map(fn {part, idx} ->
-    padding = String.duplicate(" ", idx * 2)
-    connector = if idx == 0, do: "", else: "└─"
-    "#{padding}#{connector}📂 #{part}"
-  end)
-  |> Enum.join("\n")
-
-  Kino.Markdown.new("""
-  ### 🗺️ Current Directory
-  #{viz}
-  """)
-end
 
 stream_command = fn command, frame ->
   port = Port.open({:spawn, "/bin/sh -c '#{command}'"}, [:binary, :exit_status, :stderr_to_stdout])
@@ -255,7 +224,6 @@ end
 
 ```elixir
 frames = %{
-  viz: Kino.Frame.new(),
   status: Kino.Frame.new(),
   clone: Kino.Frame.new(),
   make: Kino.Frame.new(),
@@ -297,6 +265,7 @@ render_status = fn state ->
 
   Kino.Markdown.new("### Build Progress\n#{status_text}")
 end
+
 ```
 
 ````elixir
@@ -315,8 +284,6 @@ Kino.listen(buttons.clone, fn _event ->
     if success do
       Agent.update(build_state, &Map.put(&1, :clone_complete, true))
       Kino.Frame.render(frames.status, render_status.(Agent.get(build_state, & &1)))
-      Kino.Frame.render(frames.viz, create_path_viz.())
-      Kino.Frame.render(frames.viz, create_tree.("."))
     end
   end)
 end)
@@ -343,9 +310,6 @@ Kino.listen(buttons.make, fn _event ->
       build_success = stream_command.(build_steps, frames.make)
 
       if build_success do
-        # Update visualization
-        Kino.Frame.render(frames.viz, create_path_viz.())
-        Kino.Frame.render(frames.viz, create_tree.("."))
 
         Agent.update(build_state, fn state ->
           Map.put(state, :make_complete, true)
@@ -425,7 +389,6 @@ Kino.Frame.render(frames.status, render_status.(Agent.get(build_state, & &1)))
 
 # Create and render the full layout
 Kino.Layout.grid([
-  frames.viz,
   frames.status,
   Kino.Layout.grid([
     Kino.Markdown.new("### Step 1: Clone the Repository"),
