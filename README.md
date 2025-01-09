@@ -3,8 +3,8 @@
 <div align="center">
 
 [![Build](https://img.shields.io/github/actions/workflow/status/kagemnikarimu/scriptorium/docker-image.yml?style=flat-square)](https://github.com/kagemnikarimu/scriptorium/actions)
-![Docker Pulls](https://img.shields.io/docker/pulls/kagemnikarimu/scriptorium)
-![Docker Image Size (latest by date)](https://img.shields.io/docker/image-size/kagemnikarimu/scriptorium)
+[![Docker Pulls](https://img.shields.io/docker/pulls/kagemnikarimu/scriptorium)](https://hub.docker.com/r/kagemnikarimu/scriptorium)
+[![Docker Image Size (latest by date)](https://img.shields.io/docker/image-size/kagemnikarimu/scriptorium)](https://hub.docker.com/r/kagemnikarimu/scriptorium/tags)
 
 </div>
 
