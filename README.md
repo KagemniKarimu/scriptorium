@@ -1,7 +1,12 @@
 ![scriptorium_logo_alpha.png](livebook/files/scriptorium_logo_alpha.png)
+
+<div align="center">
+
 [![Build](https://img.shields.io/github/actions/workflow/status/kagemnikarimu/scriptorium/docker-image.yml?style=flat-square)](https://github.com/kagemnikarimu/scriptorium/actions)
 ![Docker Pulls](https://img.shields.io/docker/pulls/kagemnikarimu/scriptorium)
 ![Docker Image Size (latest by date)](https://img.shields.io/docker/image-size/kagemnikarimu/scriptorium)
+
+</div>
 
 # 🔮 scriptorium
 the universal manuscript livebook &amp; learning center
