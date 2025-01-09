@@ -1,4 +1,4 @@
-<!-- livebook:{"app_settings":{"access_type":"public","slug":"scriptorium-network"},"file_entries":[{"name":"abstract-decoded-raw.png","type":"attachment"},{"name":"scriptorium_chainbase.png","type":"attachment"}]} -->
+<!-- livebook:{"app_settings":{"access_type":"public","slug":"scriptorium-network"},"file_entries":[{"name":"scriptorium_chainbase.png","type":"attachment"}]} -->
 
 # 🔮 scriptorium
 
