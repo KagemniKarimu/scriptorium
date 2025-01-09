@@ -1,9 +1,9 @@
 ![scriptorium_logo_alpha.png](livebook/files/scriptorium_logo_alpha.png)
 
-# scriptorium
+# 🔮 scriptorium
 the universal manuscript livebook &amp; learning center
 
-# quick start
+# ✨ quick start
 Pull and run the container directly:
 
 ```bash
@@ -14,7 +14,7 @@ Note: Ports must be mapped to access:
 - 8080: Main interface
 - 8081: LiveBook server
 
-# build yourself
+# 🔬 build yourself
 
 Clone and build locally:
 
