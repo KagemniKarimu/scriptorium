@@ -4,8 +4,16 @@ on:
   push:
     branches: ["main"]
     tags: ["v*.*.*"]
+    paths:
+      - "Dockerfile"
+      - ".github/workflows/docker-image.yml"
+      - "livebook/**"
   pull_request:
     branches: ["main"]
+    paths:
+      - "Dockerfile"
+      - ".github/workflows/docker-image.yml"
+      - "livebook/**"
 
 jobs:
   build-and-push:
