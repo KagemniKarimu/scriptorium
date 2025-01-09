@@ -378,7 +378,7 @@ Kino.listen(buttons.install, fn _event ->
     Task.async(fn ->
       install_command = """
       cd #{build_dir} && \
-      make install-all 2>&1
+      make install 2>&1
       """
 
       success = stream_command.(install_command, frames.install)
