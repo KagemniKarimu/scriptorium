@@ -5,7 +5,7 @@
 ```elixir
 Mix.install([
   # HTTP client
-  {:req, "~> 0.4.0"},
+  {:req, "~> 0.5.8"},
   # JSON parser
   {:jason, "~> 1.4"},
   # For visualization
