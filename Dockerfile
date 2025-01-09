@@ -12,6 +12,7 @@ ENV PATH="/usr/local/go/bin:${PATH}"
 RUN apt-get update && apt-get install -y \
     build-essential \
     libssl-dev \
+    pkg-config \
     rustc \
     cargo \
     && rm -rf /var/lib/apt/lists/*
