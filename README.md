@@ -1,6 +1,7 @@
+![scriptorium_logo_alpha.png](livebook/files/scriptorium_logo_alpha.png)
+
 # scriptorium
 the universal manuscript livebook &amp; learning center
-![scriptorium_logo_alpha.png](files/scriptorium_logo_alpha.png)
 
 # quick start
 Pull and run the container directly:
