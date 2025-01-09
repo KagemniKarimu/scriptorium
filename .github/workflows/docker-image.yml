@@ -19,7 +19,7 @@ jobs:
   build-and-push:
     # Only run if we have secrets for pushing or if it's a PR from the main repo
     if: |
-      github.event_name == 'push' ||
+      (github.event_name == 'push' && github.repository == 'kagemnikarimu/scriptorium') ||
       (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository)
     runs-on: ubuntu-latest
     steps:
