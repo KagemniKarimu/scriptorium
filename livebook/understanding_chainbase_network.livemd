@@ -135,14 +135,14 @@ data_flow_section = Kino.Markdown.new("""
 
 data_flow_diagram = Kino.Mermaid.new("""
 graph TB
-    User["6. User/Application"]
-    Raw["1. Raw Blockchain Data"]
+    User["6 - User/Application"]
+    Raw["1 - Raw Blockchain Data"]
 
     subgraph Chain["Chainbase Network"]
         subgraph Process["Data Processing"]
-            Access["2. Data Access Layer"]
-            Proc["3. Co-processor Layer"]
-            Exec["4. Execution Layer"]
+            Access["2 - Data Access Layer"]
+            Proc["3 - Co-processor Layer"]
+            Exec["4 - Execution Layer"]
 
             Access --> Proc
             Proc --> |"Manuscript"| Exec
@@ -150,11 +150,11 @@ graph TB
         end
 
         subgraph Security["Security & Consensus"]
-            Val["4a. Validators"]
+            Val["4a - Validators"]
             Val -.-> Exec
         end
 
-        Out{{"5. AI-Ready Data"}}
+        Out{{"5 - AI-Ready Data"}}
     end
 
     Raw --> Access
