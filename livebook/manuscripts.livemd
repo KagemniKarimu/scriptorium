@@ -423,7 +423,7 @@ end
 # Final layout with descriptions and right-aligned buttons
 Kino.Layout.grid([
   frames.status,
-  
+
   # Step 1
   Kino.Layout.grid([
     Kino.Markdown.new("### 🔵 Step 1: Clone the Repository"),
@@ -431,7 +431,7 @@ Kino.Layout.grid([
   ], columns: 2, gap: 300),
   Kino.Markdown.new("Downloads the latest manuscript source code from GitHub."),
   frames.clone,
-  
+
   # Step 2
   Kino.Layout.grid([
     Kino.Markdown.new("### 🔵 Step 2: Build All Components"),
@@ -439,7 +439,7 @@ Kino.Layout.grid([
   ], columns: 2, gap: 300),
   Kino.Markdown.new("Compiles both the CLI and GUI components, respectively. This will take several minutes to collect required packages."),
   frames.make,
-  
+
   # Step 3
   Kino.Layout.grid([
     Kino.Markdown.new("### 🔵 Step 3: Install"),
@@ -447,7 +447,7 @@ Kino.Layout.grid([
   ], columns: 2, gap: 300),
   Kino.Markdown.new("Installs the compiled binaries to your system. The Makefile places them in `/usr/bin/` or an appropriate execution path."),
   frames.install,
-  
+
   # Step 4
   Kino.Layout.grid([
     Kino.Markdown.new("### 🔵 Step 4: Verify Installation"),
@@ -466,13 +466,13 @@ Kino.HTML.new("""
 ```elixir
 Kino.Markdown.new("""
 
-### Congratulations 🎉 
+### Congratulations 🎉
 
 Now, that you've installed the tools, you're ready to get started tinkering with actual manuscripts. To begin with, it's best to understand that there's a difference between the `GUI` and `CLI`.
 
 #### `manusript-gui`
 
-`manuscript-gui` is built from Rust as a Textual User Interface (TUI) tool to be used from a Terminal window. It provides a graphical experience customizing, configuring, testing, and deploying manuscripts. When working with manuscripts in the wild, it is the preferred route. 
+`manuscript-gui` is built from Rust as a Textual User Interface (TUI) tool to be used from a Terminal window. It provides a graphical experience customizing, configuring, testing, and deploying manuscripts. When working with manuscripts in the wild, it is the preferred route.
 
 """) |> Kino.render()
 
@@ -488,7 +488,7 @@ Presently, full TUI apps are not supported from Livebook, so working with the GU
 
 Still, there are many important things to know about what `manuscript-gui` can do! With it you can easily do the following:
 
-- Assess the Available Chains 
+- Assess the Available Chains
 - Create a Manuscript
 - Edit the Manuscript Logic using SQL
 - View Running Manuscript Jobs
@@ -502,12 +502,12 @@ Still, there are many important things to know about what `manuscript-gui` can d
 Kino.Markdown.new("""
 #### `manuscript-cli`
 
-`manuscript-gui` is built from Golang as a Command Line Interface (CLI) tool to be used from a Terminal window as well. 
+`manuscript-gui` is built from Golang as a Command Line Interface (CLI) tool to be used from a Terminal window as well.
 It gives us a programmable interface for making and building manuscripts.
 
 
 Let's learn the basic commands:
-""")
+""") |> Kino.render()
 
 cli_frames = %{
   init: Kino.Frame.new(),
@@ -524,7 +524,7 @@ cli_frames = %{
 }
 
 # Setup frames for command titles
-title_frames = Map.new(Map.keys(cli_frames), fn key -> 
+title_frames = Map.new(Map.keys(cli_frames), fn key ->
   {key, Kino.Frame.new()}
 end)
 
@@ -534,7 +534,7 @@ cli_buttons = Map.new(Map.keys(cli_frames), fn key ->
 end)
 
 # Initialize frame status tracking
-{:ok, frame_status} = Agent.start_link(fn -> 
+{:ok, frame_status} = Agent.start_link(fn ->
   Map.new(Map.keys(cli_frames), fn key -> {key, "🔵"} end)
 end)
 
@@ -543,7 +543,7 @@ end)
 update_command_title = fn frame_key, status ->
   Agent.update(frame_status, &Map.put(&1, frame_key, status))
   statuses = Agent.get(frame_status, & &1)
-  
+
   title = case frame_key do
     :init -> "#{statuses.init} Basic Initialize"
     :init_interactive -> "#{statuses.init_interactive} Interactive Initialize"
@@ -557,7 +557,7 @@ update_command_title = fn frame_key, status ->
     :version -> "#{statuses.version} Version Check"
     :help -> "#{statuses.help} Get Help"
   end
-  
+
   Kino.Frame.render(title_frames[frame_key], Kino.Markdown.new("### #{title}"))
 end
 
@@ -671,7 +671,7 @@ for {key, button} <- cli_buttons do
   Kino.listen(button, fn _event ->
     # Set status to blue when starting
     update_command_title.(key, "🔵")
-    
+
     Task.async(fn ->
       success = stream_command.(
         cli_commands[key].command,
@@ -698,7 +698,7 @@ Kino.Layout.grid([
   - `dataset` , what specific data you want from the chain (e.g. `blocks` `transacations` are common)
   - `output`, either to a database(`postgresql`) or to the `console`
   """),
-  
+
   # Basic Init
   Kino.Layout.grid([
     title_frames.init,
@@ -706,7 +706,7 @@ Kino.Layout.grid([
   ], columns: 2, gap: 300),
   Kino.Markdown.new("If you try to run `manuscript init` with the improper parameters, you'll get descriptive errors!"),
   cli_frames.init,
-  
+
   # Interactive Init
   Kino.Layout.grid([
     title_frames.init_interactive,
@@ -714,7 +714,7 @@ Kino.Layout.grid([
   ], columns: 2, gap: 300),
   Kino.Markdown.new("Running `manuscript init` with no other text starts an interactive setup process with prompts for all settings. Note that this command is shown just for demo purposes and you cannot interact with it on this livebook."),
   cli_frames.init_interactive,
-  
+
   # Non-interactive Init
   Kino.Layout.grid([
     title_frames.init_noninteractive,
@@ -724,13 +724,13 @@ Kino.Layout.grid([
   cli_frames.init_noninteractive,
 
   html("<br/><br/>"),
-  
+
   # Configuration Section
   Kino.Markdown.new("""
   ## ⚙️ Configuration Commands
   The `config` commands let you view and manage manuscript configurations. Each manuscript created is actually a folder composed of several files and stored locally on disk. However, `manuscript_cli` also tracks all manuscripts on disk in a config file. By default this file is stored in the user's home directory's `.config/` folder
   """),
-  
+
   # Basic Config
   Kino.Layout.grid([
     title_frames.config,
@@ -738,7 +738,7 @@ Kino.Layout.grid([
   ], columns: 2, gap: 300),
   Kino.Markdown.new("We can run `config` to see the location of the config file. This is useful if you want to edit it directly."),
   cli_frames.config,
-  
+
   # Config Show
   Kino.Layout.grid([
     title_frames.config_show,
@@ -746,7 +746,7 @@ Kino.Layout.grid([
   ], columns: 2, gap: 300),
   Kino.Markdown.new("Running `config show` displays the complete configuration in detail. Notice the config file is actually in JSON format. This is equivalent to what you would get if you went, found this file on disk, and opened it."),
   cli_frames.config_show,
-  
+
   # Config Summary
   Kino.Layout.grid([
     title_frames.config_summary,
@@ -756,13 +756,13 @@ Kino.Layout.grid([
   cli_frames.config_summary,
 
   html("<br/><br/>"),
-  
+
   # Management Commands Section
   Kino.Markdown.new("""
   ## 🛠️ Management Commands
   There are also some necessary commands to know once you've gotten manuscript jobs running:
   """),
-  
+
   # List
   Kino.Layout.grid([
     title_frames.list,
@@ -770,7 +770,7 @@ Kino.Layout.grid([
   ], columns: 2, gap: 300),
   Kino.Markdown.new("The command `list` lists all running manuscript jobs. It also has the linux alias `ls`. If we have initialized, we should successfully see `my-manuscript` running."),
   cli_frames.list,
-  
+
   # Logs
   Kino.Layout.grid([
     title_frames.logs,
@@ -788,13 +788,13 @@ Kino.Layout.grid([
   cli_frames.stop,
 
     html("<br/><br/>"),
-  
+
   # Utility Commands Section
   Kino.Markdown.new("""
   ## 🔧 Utility Commands
   General utility commands:
   """),
-  
+
   # Version
   Kino.Layout.grid([
     title_frames.version,
@@ -802,7 +802,7 @@ Kino.Layout.grid([
   ], columns: 2, gap: 300),
   Kino.Markdown.new("During the installation, you used `manuscript-cli version --verbose` to ensure you had a successful install. The normal `version` command shows the current version of `manuscript-core` being used by the CLI."),
   cli_frames.version,
-  
+
   # Help
   Kino.Layout.grid([
     title_frames.help,
@@ -825,5 +825,5 @@ Kino.Markdown.new("""
 
 **[← Previous: Understanding the Chainbase Network](#{prev_link}) | [Next: Manuscripts & Their Mechanisms →](#{next_link})**
 """)
-    
+
 ```
