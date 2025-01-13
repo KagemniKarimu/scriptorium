@@ -133,11 +133,11 @@ Kino.listen(toggle_button, fn _ ->
     Kino.Frame.render(version_frame, Kino.Markdown.new(version_check))
   else
     Kino.Frame.render(version_frame, Kino.Markdown.new(""))
+    Kino.nothing()
   end
 end)
 
-Kino.Markdown.new("""
-""")
+Kino.nothing()
 ```
 
 ````elixir
@@ -455,7 +455,11 @@ Kino.Layout.grid([
   ], columns: 2, gap: 300),
   Kino.Markdown.new("Confirms the installation was successful by running the `manuscript-cli version --verbose` command."),
   frames.verify
-])
+]) |> Kino.render()
+
+Kino.HTML.new("""
+<hr/>
+""")
 
 ````
 
@@ -480,13 +484,334 @@ content =
 
 Kino.Markdown.new("""
 
-Presently, full TUI apps are not supported from Livebook, so o
+Presently, full TUI apps are not supported from Livebook, so working with the GUI will be indirect in the `scriptoroium.`
 
+Still, there are many important things to know about what `manuscript-gui` can do! With it you can easily do the following:
+
+- Assess the Available Chains 
+- Create a Manuscript
+- Edit the Manuscript Logic using SQL
+- View Running Manuscript Jobs
+- Deploy Locally
+
+""")
+
+```
+
+````elixir
+Kino.Markdown.new("""
 #### `manuscript-cli`
 
 `manuscript-gui` is built from Golang as a Command Line Interface (CLI) tool to be used from a Terminal window as well. 
 It gives us a programmable interface for making and building manuscripts.
+
+
+Let's learn the basic commands:
 """)
+
+cli_frames = %{
+  init: Kino.Frame.new(),
+  init_interactive: Kino.Frame.new(),
+  init_noninteractive: Kino.Frame.new(),
+  config: Kino.Frame.new(),
+  config_show: Kino.Frame.new(),
+  config_summary: Kino.Frame.new(),
+  list: Kino.Frame.new(),
+  stop: Kino.Frame.new(),
+  logs: Kino.Frame.new(),
+  version: Kino.Frame.new(),
+  help: Kino.Frame.new()
+}
+
+# Setup frames for command titles
+title_frames = Map.new(Map.keys(cli_frames), fn key -> 
+  {key, Kino.Frame.new()}
+end)
+
+# Button setup for each command
+cli_buttons = Map.new(Map.keys(cli_frames), fn key ->
+  {key, Kino.Control.button("▶️ Run on Livebook")}
+end)
+
+# Initialize frame status tracking
+{:ok, frame_status} = Agent.start_link(fn -> 
+  Map.new(Map.keys(cli_frames), fn key -> {key, "🔵"} end)
+end)
+
+
+# Helper function to update title status
+update_command_title = fn frame_key, status ->
+  Agent.update(frame_status, &Map.put(&1, frame_key, status))
+  statuses = Agent.get(frame_status, & &1)
+  
+  title = case frame_key do
+    :init -> "#{statuses.init} Basic Initialize"
+    :init_interactive -> "#{statuses.init_interactive} Interactive Initialize"
+    :init_noninteractive -> "#{statuses.init_noninteractive} Non-interactive Initialize"
+    :config -> "#{statuses.config} View Config"
+    :config_show -> "#{statuses.config_show} Show Full Config"
+    :config_summary -> "#{statuses.config_summary} Show Config Summary"
+    :list -> "#{statuses.list} List Jobs"
+    :stop -> "#{statuses.stop} Stop Job"
+    :logs -> "#{statuses.logs} View Logs"
+    :version -> "#{statuses.version} Version Check"
+    :help -> "#{statuses.help} Get Help"
+  end
+  
+  Kino.Frame.render(title_frames[frame_key], Kino.Markdown.new("### #{title}"))
+end
+
+# Command definitions with actual commands to execute
+cli_commands = %{
+  init: %{
+    preview: """
+    ```bash
+    $ manuscript-cli init [manuscript-name] [flags]
+    ```
+    """,
+    command: "manuscript-cli init example-manuscript"
+  },
+  init_interactive: %{
+    preview: """
+    ```bash
+    $ manuscript-cli init
+    ```
+    """,
+    command: "manuscript-cli init"
+  },
+  init_noninteractive: %{
+    preview: """
+    ```bash
+    $ manuscript-cli init my-manuscript \\
+      --output postgresql \\
+      --protocol ethereum \\
+      --dataset blocks
+    ```
+    """,
+    command: "manuscript-cli init my-manuscript --output postgresql --protocol ethereum --dataset blocks"
+  },
+  config: %{
+    preview: """
+    ```bash
+    $ manuscript-cli config
+    ```
+    """,
+    command: "manuscript-cli config"
+  },
+  config_show: %{
+    preview: """
+    ```bash
+    $ manuscript-cli config show
+    ```
+    """,
+    command: "manuscript-cli config show"
+  },
+  config_summary: %{
+    preview: """
+    ```bash
+    $ manuscript-cli config show --summary
+    ```
+    """,
+    command: "manuscript-cli config show --summary"
+  },
+  list: %{
+    preview: """
+    ```bash
+    $ manuscript-cli list
+    ```
+    """,
+    command: "manuscript-cli list"
+  },
+  stop: %{
+    preview: """
+    ```bash
+    $ manuscript-cli stop example-manuscript
+    ```
+    """,
+    command: "manuscript-cli stop example-manuscript"
+  },
+  logs: %{
+    preview: """
+    ```bash
+    $ manuscript-cli logs example-manuscript
+    ```
+    """,
+    command: "manuscript-cli logs example-manuscript"
+  },
+  version: %{
+    preview: """
+    ```bash
+    $ manuscript-cli version
+    ```
+    """,
+    command: "manuscript-cli version"
+  },
+  help: %{
+    preview: """
+    ```bash
+    $ manuscript-cli help
+    ```
+    """,
+    command: "manuscript-cli help"
+  }
+}
+
+# Initialize frames with command previews
+for {frame_key, %{preview: preview}} <- cli_commands do
+  Kino.Frame.render(cli_frames[frame_key], Kino.Markdown.new(preview))
+end
+
+# Initialize all title frames with blue status
+for {key, _frame} <- title_frames do
+  update_command_title.(key, "🔵")
+end
+
+# Add listeners for each button
+for {key, button} <- cli_buttons do
+  Kino.listen(button, fn _event ->
+    # Set status to blue when starting
+    update_command_title.(key, "🔵")
+    
+    Task.async(fn ->
+      success = stream_command.(
+        cli_commands[key].command,
+        cli_frames[key]
+      )
+      # Update status based on success
+      status = if success, do: "🟢", else: "🔴"
+      update_command_title.(key, status)
+    end)
+  end)
+end
+
+Kino.nothing()
+````
+
+```elixir
+# Create and render the full layout
+Kino.Layout.grid([
+  # Init Command Section
+  Kino.Markdown.new("""
+  ## 📦 Initialize Commands
+  The CLI's `init` command is used to create new manuscript projects. It has two main usage patterns: 1) interactive with no parameters, 2) non-interactive with parameters. To initialize a manuscript, you have to define several things:
+  - `protocol` , sometimes referred to as the chain (e.g. `ethereum`, `zksync`, `solana`)
+  - `dataset` , what specific data you want from the chain (e.g. `blocks` `transacations` are common)
+  - `output`, either to a database(`postgresql`) or to the `console`
+  """),
+  
+  # Basic Init
+  Kino.Layout.grid([
+    title_frames.init,
+    cli_buttons.init
+  ], columns: 2, gap: 300),
+  Kino.Markdown.new("If you try to run `manuscript init` with the improper parameters, you'll get descriptive errors!"),
+  cli_frames.init,
+  
+  # Interactive Init
+  Kino.Layout.grid([
+    title_frames.init_interactive,
+    cli_buttons.init_interactive
+  ], columns: 2, gap: 300),
+  Kino.Markdown.new("Running `manuscript init` with no other text starts an interactive setup process with prompts for all settings. Note that this command is shown just for demo purposes and you cannot interact with it on this livebook."),
+  cli_frames.init_interactive,
+  
+  # Non-interactive Init
+  Kino.Layout.grid([
+    title_frames.init_noninteractive,
+    cli_buttons.init_noninteractive
+  ], columns: 2, gap: 300),
+  Kino.Markdown.new("Running `manuscript init` with a full list of parameters creates a new manuscript with all settings specified via its command line flags."),
+  cli_frames.init_noninteractive,
+
+  html("<br/><br/>"),
+  
+  # Configuration Section
+  Kino.Markdown.new("""
+  ## ⚙️ Configuration Commands
+  The `config` commands let you view and manage manuscript configurations. Each manuscript created is actually a folder composed of several files and stored locally on disk. However, `manuscript_cli` also tracks all manuscripts on disk in a config file. By default this file is stored in the user's home directory's `.config/` folder
+  """),
+  
+  # Basic Config
+  Kino.Layout.grid([
+    title_frames.config,
+    cli_buttons.config
+  ], columns: 2, gap: 300),
+  Kino.Markdown.new("We can run `config` to see the location of the config file. This is useful if you want to edit it directly."),
+  cli_frames.config,
+  
+  # Config Show
+  Kino.Layout.grid([
+    title_frames.config_show,
+    cli_buttons.config_show
+  ], columns: 2, gap: 300),
+  Kino.Markdown.new("Running `config show` displays the complete configuration in detail. Notice the config file is actually in JSON format. This is equivalent to what you would get if you went, found this file on disk, and opened it."),
+  cli_frames.config_show,
+  
+  # Config Summary
+  Kino.Layout.grid([
+    title_frames.config_summary,
+    cli_buttons.config_summary
+  ], columns: 2, gap: 300),
+  Kino.Markdown.new("We can generate a useful summary with feedback on our file by running `config show --summary`. This command shows a summary of the current configuration file, its location on disk, and any discrepancies between manuscripts on disk and those listed in the config file. It's quite useful for debugging."),
+  cli_frames.config_summary,
+
+  html("<br/><br/>"),
+  
+  # Management Commands Section
+  Kino.Markdown.new("""
+  ## 🛠️ Management Commands
+  There are also some necessary commands to know once you've gotten manuscript jobs running:
+  """),
+  
+  # List
+  Kino.Layout.grid([
+    title_frames.list,
+    cli_buttons.list
+  ], columns: 2, gap: 300),
+  Kino.Markdown.new("The command `list` lists all running manuscript jobs. It also has the linux alias `ls`. If we have initialized, we should successfully see `my-manuscript` running."),
+  cli_frames.list,
+  
+  # Logs
+  Kino.Layout.grid([
+    title_frames.logs,
+    cli_buttons.logs
+  ], columns: 2, gap: 300),
+  Kino.Markdown.new("The command `logs` shows logs for a running manuscript. Once again, this command may be extremely useful for debugging our manuscript state. Let's take a look at the logs of `my-manuscript`"),
+  cli_frames.logs,
+
+    # Stop
+  Kino.Layout.grid([
+    title_frames.stop,
+    cli_buttons.stop
+  ], columns: 2, gap: 300),
+  Kino.Markdown.new("The command `stop` stops a running manuscript job. Stopping is a destructive action that tears down and deletes running docker containers related to our manuscript. This is important so we don't consume unnecessary resources when not using our manuscript. Manuscripts can be reconstructed with the `deploy` command. Let's stop our `my-manuscript` from running."),
+  cli_frames.stop,
+
+    html("<br/><br/>"),
+  
+  # Utility Commands Section
+  Kino.Markdown.new("""
+  ## 🔧 Utility Commands
+  General utility commands:
+  """),
+  
+  # Version
+  Kino.Layout.grid([
+    title_frames.version,
+    cli_buttons.version
+  ], columns: 2, gap: 300),
+  Kino.Markdown.new("During the installation, you used `manuscript-cli version --verbose` to ensure you had a successful install. The normal `version` command shows the current version of `manuscript-core` being used by the CLI."),
+  cli_frames.version,
+  
+  # Help
+  Kino.Layout.grid([
+    title_frames.help,
+    cli_buttons.help
+  ], columns: 2, gap: 300),
+  Kino.Markdown.new("Pressing `help` with any command gives us information about that command. Running `help` alone prints a list of all available commands."),
+  cli_frames.help
+])
+
 ```
 
 ```elixir
@@ -500,4 +825,5 @@ Kino.Markdown.new("""
 
 **[← Previous: Understanding the Chainbase Network](#{prev_link}) | [Next: Manuscripts & Their Mechanisms →](#{next_link})**
 """)
+    
 ```
