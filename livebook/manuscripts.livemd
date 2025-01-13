@@ -1,4 +1,4 @@
-<!-- livebook:{"app_settings":{"access_type":"public","slug":"scriptorium-manuscripts"},"file_entries":[{"name":"GUI_Screencast.mp4","type":"attachment"},{"name":"manuscripts_mechanics.png","type":"attachment"}]} -->
+<!-- livebook:{"app_settings":{"access_type":"public","slug":"scriptorium-manuscripts"},"file_entries":[{"name":"CLI_Screenshot.png","type":"attachment"},{"name":"GUI_Screencast.mp4","type":"attachment"},{"name":"manuscripts_mechanics.png","type":"attachment"}]} -->
 
 # 🔮 scriptorium
 
@@ -476,7 +476,7 @@ Now, that you've installed the tools, you're ready to get started tinkering with
 
 """) |> Kino.render()
 
-content =
+gui_screencast =
   Kino.FS.file_path("GUI_Screencast.mp4")
   |> File.read!()
   |> Kino.Video.new(:mp4,autoplay: true, loop: true)
@@ -508,6 +508,14 @@ It gives us a programmable interface for making and building manuscripts.
 
 Let's learn the basic commands:
 """) |> Kino.render()
+
+
+cli_screenshot =
+  Kino.FS.file_path("CLI_Screenshot.png")
+  |> File.read!  
+  |> Kino.Image.new(:png)
+  |> Kino.render()
+
 
 cli_frames = %{
   init: Kino.Frame.new(),
