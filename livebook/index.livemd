@@ -31,15 +31,43 @@ The `scriptorium` is an open-source, interactive [livebook](https://hexdocs.pm/l
 ```
 
 ```elixir
+chapters = [
+  %{
+    number: 1,
+    title: "Introduction to Scriptorium",
+    link: "#{base_url}/scriptorium-intro"
+  },
+  %{
+    number: 2,
+    title: "Understanding the Chainbase Network",
+    link: "#{base_url}/scriptorium-network"
+  },
+  %{
+    number: 3,
+    title: "Manuscripts & Their Mechanisms",
+    link: "#{base_url}/scriptorium-manuscripts"
+  },
+  %{
+    number: 4,
+    title: "Advanced Features",
+    link: "#{base_url}/scriptorium-advanced"
+  },
+  %{
+    number: 5,
+    title: "Examples and Use Cases",
+    link: "#{base_url}/scriptorium-examples"
+  }
+]
+
+toc_content = chapters
+|> Enum.map(fn %{number: num, title: title, link: link} ->
+  "* Chapter #{num}: [#{title}](#{link})"
+end)
+|> Enum.join("\n")
+
 Kino.Markdown.new("""
-
 ### 📋 Table of Contents
-
-* Chapter 1: [Introduction to Scriptorium]("#{base_url}/scriptorium-intro")
-* Chapter 2: [Understanding the Chainbase Network]("#{base_url}/scriptorium-network")
-* Chapter 3: [Manuscripts & Their Mechanisms]("#{base_url}/scriptorium-manuscripts")
-* Chapter 4: [Advanced Features]()
-* Chapter 5: [Examples and Use Cases]()
+#{toc_content}
 """)
 ```
 
