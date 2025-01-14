@@ -1,0 +1,161 @@
+<!-- livebook:{"app_settings":{"access_type":"public","slug":"scriptorium-advanced"}} -->
+
+# 🔮 scriptorium
+
+```elixir
+Mix.install([
+  # For visualization
+  {:kino, "~> 0.14.2"},
+])
+
+Application.put_env(:livebook, :deployment, [
+  title: "scriptorium",
+  public_access: true
+])
+
+
+port = System.get_env("LIVEBOOK_PORT", "8080")
+hostname = System.get_env("LIVEBOOK_HOSTNAME", "localhost")
+base_url = "http://#{hostname}:#{port}/apps"
+```
+
+## Section
+
+```elixir
+import Kino.Shorts
+
+markdown("""
+
+# Understanding More...
+
+
+There's lots to potentially understand about manuscripts. For one, we have to see that a manuscript is not really *one* thing. When we launch a manuscript, we're actually launching several
+In fact, a manuscript is a combination of four different components launched by flink:
+""") |> Kino.render()
+
+explanation=markdown("""
+
+### The Schematics
+When you run a manuscript, it starts up *four* key services that work together like a well-oiled machine:
+
+1. The **Flink JobManager** is like the conductor of an orchestra. It coordinates everything and tells other components what to do.
+2. The **Flink TaskManager** is where the actual work happens. Think of it as the musician in our orchestra - it's the one processing your data according to the manuscript's instructions.
+3. **PostgreSQL** is our storage system. As the TaskManager processes data, it needs somewhere to save the results - that's what PostgreSQL does.
+4. Finally, **Hasura** provides a GraphQL API that makes it easy to access the processed data that's stored in PostgreSQL. It's like a friendly librarian who helps you find exactly what you need from all the processed data.
+""")
+
+grid( [mermaid("""
+flowchart LR
+    JM("JobManager")
+    TM("TaskManager")
+    PG[("PostgreSQL")]
+    HS["Hasura"]
+
+    JM --> |"coordinates work"| TM
+    TM --> |"stores results"| PG
+    PG --> |"exposes data"| HS
+
+    style JM fill:#4a9eff,color:#fff,stroke:#0066cc
+    style TM fill:#4a9eff,color:#fff,stroke:#0066cc
+    style PG fill:#00acc1,color:#fff,stroke:#007c91
+    style HS fill:#ff4081,color:#fff,stroke:#c60055
+"""), explanation], columns: 1)
+```
+
+```elixir
+
+container_frame = Kino.Frame.new()
+refresh_button = Kino.Control.button("🔄 Refresh Container Status")
+loading_indicator = Kino.Frame.new()
+
+get_containers = fn ->
+  # We'll use a simpler docker command and process the spacing ourselves
+  case System.cmd("docker", ["ps"]) do
+    {output, 0} ->
+      # Split into lines and drop the header (we'll create our own)
+      [_header | containers] = String.split(output, "\n", trim: true)
+
+      # Create our markdown table header
+      table = """
+      | Container ID | Image | Status | Ports | Name |
+      |--------------|-------|---------|-------|------|
+      """
+
+      # Process each container line
+      # The docker ps output has consistent spacing that we can use
+      rows = containers |> Enum.map(fn line ->
+        # Extract each field carefully, preserving spaces within fields
+        case Regex.run(~r/^(.{12}).+?(\S+)\s+((?:(?:Up|Restarting).*?))\s+(\S.*\S)\s+(\S+)$/, line) do
+          [_full, id, image, status, ports, name] ->
+            "| #{id} | #{image} | #{status} | #{ports} | #{name} |"
+          _ ->
+            "| Error parsing line: #{line} |||||"
+        end
+      end)
+
+      table = table <> Enum.join(rows, "\n")
+      {:ok, table}
+
+    {error, _} ->
+      {:error, "Failed to access Docker: #{error}"}
+  end
+end
+
+update_display = fn ->
+  Kino.Frame.render(loading_indicator, Kino.Markdown.new("⏳ Fetching container status..."))
+
+  case get_containers.() do
+    {:ok, table} ->
+      content = """
+      ## 🐳 Docker Container Status
+
+      #{table}
+
+      Last updated: #{DateTime.utc_now() |> Calendar.strftime("%Y-%m-%d %H:%M:%S UTC")}
+      """
+      Kino.Frame.render(container_frame, Kino.Markdown.new(content))
+
+    {:error, error} ->
+      Kino.Frame.render(container_frame, Kino.Markdown.new("""
+      ## ❌ Error
+
+      #{error}
+
+      Make sure:
+      1. The Docker socket is mounted (`-v /var/run/docker.sock:/var/run/docker.sock`)
+      2. The container has necessary permissions
+      """))
+  end
+
+  Kino.Frame.render(loading_indicator, Kino.Markdown.new(""))
+end
+
+# Render the interface
+Kino.Layout.grid([refresh_button, loading_indicator], columns: 2) |> Kino.render()
+container_frame |> Kino.render()
+
+# Set up the refresh button handler
+Kino.listen(refresh_button, fn _event ->
+  update_display.()
+end)
+
+# Initial update
+update_display.()
+
+
+
+```
+
+```elixir
+next_link = "#{base_url}/scriptorium-manuscripts"
+prev_link = "#{base_url}/scriptorium-advanced"
+
+Kino.Markdown.new("""
+### 🧭 Navigation
+
+⚙️ To view the source code for this project visit https://github.com/KagemniKarimu/scriptorium
+
+**[← Previous: Manuscripts & Their Mechanisms](#{prev_link}) | [Next: Advanced Manuscript Magic →](#{next_link})**
+""")
+
+```
