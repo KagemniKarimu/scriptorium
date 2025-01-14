@@ -41,8 +41,8 @@ docker build -t scriptorium .
 
 # Run the container with Docker socket access
 docker run --rm \
-  -v /var/run/docker.sock:/var/run/docker.sock \  # Gives access to host Docker
-  -p 8080:8080 \                                  # Livebook web interface
-  -p 8081:8081 \                                  # Livebook additional port
+  -v /var/run/docker.sock:/var/run/docker.sock \
+  -p 8080:8080 \
+  -p 8081:8081 \
   scriptorium
   ```
