@@ -512,7 +512,7 @@ Let's learn the basic commands:
 
 cli_screenshot =
   Kino.FS.file_path("CLI_Screenshot.png")
-  |> File.read!  
+  |> File.read!
   |> Kino.Image.new(:png)
   |> Kino.render()
 
@@ -823,7 +823,7 @@ Kino.Layout.grid([
 ```
 
 ```elixir
-next_link = "#{base_url}/scriptorium-manuscripts"
+next_link = "#{base_url}/scriptorium-advanced"
 prev_link = "#{base_url}/scriptorium-network"
 
 Kino.Markdown.new("""
@@ -831,7 +831,7 @@ Kino.Markdown.new("""
 
 ⚙️ To view the source code for this project visit https://github.com/KagemniKarimu/scriptorium
 
-**[← Previous: Understanding the Chainbase Network](#{prev_link}) | [Next: Manuscripts & Their Mechanisms →](#{next_link})**
+**[← Previous: Understanding the Chainbase Network](#{prev_link}) | [Next: Advanced Features →](#{next_link})**
 """)
 
 ```
