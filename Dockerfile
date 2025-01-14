@@ -15,7 +15,21 @@ RUN apt-get update && apt-get install -y \
     pkg-config \
     rustc \
     cargo \
+    curl \
     && rm -rf /var/lib/apt/lists/*
+
+# Install just the Docker CLI (not the full Docker engine)
+RUN curl -fsSL https://get.docker.com/builds/Linux/x86_64/docker-latest.tgz | \
+    tar -xz -C /usr/local/bin --strip=1 docker/docker
+
+# Install Docker Compose
+RUN COMPOSE_VERSION=$(curl -s https://api.github.com/repos/docker/compose/releases/latest | grep '"tag_name":' | cut -d'"' -f4) && \
+    curl -L "https://github.com/docker/compose/releases/download/${COMPOSE_VERSION}/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose && \
+    chmod +x /usr/local/bin/docker-compose
+
+# Set up Docker Compose plugin capability
+RUN mkdir -p /usr/local/lib/docker/cli-plugins && \
+    ln -s /usr/local/bin/docker-compose /usr/local/lib/docker/cli-plugins/docker-compose
 
 # Apps configuration
 ENV LIVEBOOK_APPS_PATH="/apps"
